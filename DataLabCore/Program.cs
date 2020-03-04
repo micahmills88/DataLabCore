@@ -13,7 +13,6 @@ namespace DataLabCore
              * 1.) transfer learning - might want an entire other model to be used as input to new layers
              * 2.) non-block datasources such as from a camera or graphics output (screencap)
              * 3.) distribution of processing - for evolutionary strategies or reinforcement learning
-             * 
              */
 
             ModelBuilder builder = new ModelBuilder();
