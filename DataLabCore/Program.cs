@@ -15,13 +15,16 @@ namespace DataLabCore
              * 3.) distribution of processing - for evolutionary strategies or reinforcement learning
              */
 
-            ModelBuilder builder = new ModelBuilder();
-            builder.AddLayer(LayerType.Dense, 784, 256, ActivationType.Sigmoid);
-            builder.AddLayer(LayerType.Dense, 256, 10, ActivationType.Softmax);
+            int batch_size = 16;
+            DataSource ds = new DataSource(batch_size);
+            IModelLayer layer1 = new DenseLayer(784, 256, ActivationType.Sigmoid, batch_size);
+            IModelLayer layer2 = new DenseLayer(256, 10, ActivationType.Softmax, batch_size);
+            LossCalculator lossCalc = new LossCalculator(LossFunction.Multiclass, 10, batch_size);
 
-            DataSource ds = new DataSource();
-            var batchSize = 16;
-            builder.FitModel(ds, LossFunction.Multiclass, batchSize);
+            ModelBuilder builder = new ModelBuilder();
+            builder.AddLayer(layer1);
+            builder.AddLayer(layer2);
+            builder.FitModel(ds, lossCalc);
         }
     }
 }
