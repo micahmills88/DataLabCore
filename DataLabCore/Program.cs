@@ -9,7 +9,8 @@ namespace DataLabCore
         static void Main(string[] args)
         {
             ModelBuilder builder = new ModelBuilder();
-            //define model layers
+            builder.AddLayer(new DenseLayer(784, 1, 10, ActivationType.Sigmoid));
+
         }
     }
 }

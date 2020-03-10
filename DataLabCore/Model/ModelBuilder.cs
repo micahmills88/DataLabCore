@@ -11,8 +11,19 @@ using DataLabCore.Utils;
 
 namespace DataLabCore
 {
-    public partial class ModelBuilder
+    public class ModelBuilder
     {
-        
+        List<IModelLayer> _layers = new List<IModelLayer>();
+
+        public ModelBuilder()
+        {
+
+        }
+
+        public void AddLayer(IModelLayer layer)
+        {
+            _layers.Add(layer);
+        }
+
     }
 }

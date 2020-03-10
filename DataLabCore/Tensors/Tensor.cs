@@ -23,10 +23,17 @@ namespace DataLabCore
         protected bool remoteSynchronized = false;
         protected bool localSynchronized = false;
 
-        public Tensor()
-        {
+        #region constructors
+        public Tensor() { }
 
-        }
+        public Tensor(float[] inputs)
+            : this(1, inputs.Length, 1, 1, inputs) { }
+
+        public Tensor(int rows, int columns, float[] inputs)
+            : this(rows, columns, 1, 1, inputs) { }
+
+        public Tensor(int rows, int columns, int layers, float[] inputs)
+            : this(rows, columns, layers, 1, inputs) { }
 
         public Tensor(int rows, int cols, int lays, int cubes, float[] data)
         {
@@ -47,18 +54,22 @@ namespace DataLabCore
 
             var controller = TensorController.Instance;
             _buffer = controller.AllocateBuffer(Size);
+            SynchronizeToRemote();
         }
+        #endregion
 
         public void SynchronizeToRemote()
         {
             //copy local data to device
             _buffer.CopyFrom(Data, 0, 0, _buffer.Extent);
+            remoteSynchronized = true;
         }
 
         public void SynchronizeToLocal()
         {
             //copy device data locally
             _buffer.CopyTo(Data, 0, 0, _buffer.Extent);
+            localSynchronized = true;
         }
 
 
