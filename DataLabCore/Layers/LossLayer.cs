@@ -33,6 +33,9 @@ namespace DataLabCore
 
         public Tensor Backward(Tensor error, bool calculateInputErrors)
         {
+            //subtract the tensors
+            //perform any calculations
+            //store globally for epoch errors?
             return error;
         }
     }

@@ -22,6 +22,9 @@ namespace DataLabCore
         Dictionary<string, float[]> data_labels = new Dictionary<string, float[]>();
         Dictionary<string, float[]> data_samples = new Dictionary<string, float[]>();
 
+        Tensor sampleTensor;
+        Tensor labelTensor;
+
         public DataSource(int batchSize)
         {
             this._batchsize = batchSize;
@@ -44,38 +47,60 @@ namespace DataLabCore
                 data_labels.Add(guid, label);
                 data_samples.Add(guid, sample);
             }
+
+            BuildTensors();
         }
 
-        public Tensor GetSampleBatch(int batchnum, int batchsize)
+        public Tensor GetSampleBatch(int batchnum)
         {
-            List<float> values = new List<float>();
-            int start = batchnum * batchsize;
-            foreach (var key in keys.GetRange(start, batchsize))
-            {
-                values.AddRange(data_samples[key]);
-            }
-
-            if (flatten)
-            {
-                return new Tensor(batchsize, _height * _width * _depth, values.ToArray());
-            }
-            return new Tensor(_height, _width, _depth, batchsize, values.ToArray());
+            int offset = _width * _height * _batchsize;
+            int start = batchnum * offset;
+            sampleTensor.SetDataView(start, offset);
+            return sampleTensor;
         }
 
-        public Tensor GetLabelBatch(int batchnum, int batchsize)
+        public Tensor GetLabelBatch(int batchnum)
         {
-            List<float> values = new List<float>();
-            int start = batchnum * batchsize;
-            foreach (var key in keys.GetRange(start, batchsize))
-            {
-                values.AddRange(data_labels[key]);
-            }
-            return new Tensor(batchsize, _classes, values.ToArray());
+            int offset = _classes * _batchsize;
+            int start = batchnum * offset;
+            labelTensor.SetDataView(start, offset);
+            return labelTensor;
         }
 
         public void Shuffle()
         {
             keys.Shuffle();
+            List<float> samples = new List<float>();
+            List<float> labels = new List<float>();
+            foreach (var key in keys)
+            {
+                samples.AddRange(data_samples[key]);
+                labels.AddRange(data_labels[key]);
+            }
+
+            sampleTensor.Data = samples.ToArray();
+            labelTensor.Data = labels.ToArray();
+
+            sampleTensor.SynchronizeToRemote();
+            labelTensor.SynchronizeToRemote();
+
+            sampleTensor.Rows = _batchsize;
+            labelTensor.Rows = _batchsize;
+        }
+
+        private void BuildTensors()
+        {
+            List<float> samples = new List<float>();
+            List<float> labels = new List<float>();
+
+            foreach (var key in keys)
+            {
+                samples.AddRange(data_samples[key]);
+                labels.AddRange(data_labels[key]);
+            }
+
+            sampleTensor = new Tensor(_samplecount, _width * _height, samples.ToArray());
+            labelTensor = new Tensor(_samplecount, _classes, labels.ToArray());
         }
     }
 }

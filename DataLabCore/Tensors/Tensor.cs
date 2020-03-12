@@ -80,5 +80,12 @@ namespace DataLabCore
             Rows = Columns;
             Columns = temp;
         }
+
+        public void SetDataView(int start, int size)
+        {
+            DataView = _buffer.GetSubView(start, size);
+
+            Size = DataView.Length;
+        }
     }
 }
