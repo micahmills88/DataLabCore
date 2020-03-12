@@ -6,10 +6,13 @@ namespace DataLabCore
 {
     public interface IModelLayer
     {
+        Tensor Forward(Tensor data);
+        Tensor Backward(Tensor error, bool calculateInputErrors);
     }
 
     public enum ActivationType
     {
-        Sigmoid
+        Sigmoid,
+        Softmax
     }
 }

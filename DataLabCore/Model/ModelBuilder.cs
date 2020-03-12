@@ -7,7 +7,6 @@ using ILGPU;
 using ILGPU.Runtime;
 using ILGPU.Runtime.Cuda;
 
-using DataLabCore.Utils;
 
 namespace DataLabCore
 {
@@ -23,6 +22,20 @@ namespace DataLabCore
         public void AddLayer(IModelLayer layer)
         {
             _layers.Add(layer);
+        }
+
+        public void FitModel(/*datasource, lossfunction*/)
+        {
+            var data = new Tensor();
+            for (int i = 0; i < _layers.Count; i++)
+            {
+                data = _layers[i].Forward(data);
+            }
+            var error = new Tensor();
+            for (int i = _layers.Count - 1; i >= 0; i--)
+            {
+                error = _layers[i].Backward(error, i != 0);
+            }
         }
 
     }

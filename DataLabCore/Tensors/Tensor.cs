@@ -19,6 +19,7 @@ namespace DataLabCore
 
         public float[] Data;
         protected MemoryBuffer<float> _buffer;
+        public ArrayView<float> DataView;
 
         protected bool remoteSynchronized = false;
         protected bool localSynchronized = false;
@@ -63,6 +64,7 @@ namespace DataLabCore
             //copy local data to device
             _buffer.CopyFrom(Data, 0, 0, _buffer.Extent);
             remoteSynchronized = true;
+            DataView = _buffer.View;
         }
 
         public void SynchronizeToLocal()
@@ -72,6 +74,11 @@ namespace DataLabCore
             localSynchronized = true;
         }
 
-
+        public void Transpose2DValues()
+        {
+            int temp = Rows;
+            Rows = Columns;
+            Columns = temp;
+        }
     }
 }

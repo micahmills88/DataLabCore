@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DataLabCore.Utils
+namespace DataLabCore
 {
     public static class RandomGenerator
     {
