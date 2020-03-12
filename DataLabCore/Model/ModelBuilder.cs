@@ -24,17 +24,24 @@ namespace DataLabCore
             _layers.Add(layer);
         }
 
-        public void FitModel(/*datasource, lossfunction*/)
+        public void FitModel(DataSource dataSource, int epochs)
         {
-            var data = new Tensor();
-            for (int i = 0; i < _layers.Count; i++)
+            for (int e = 0; e < epochs; e++)
             {
-                data = _layers[i].Forward(data);
-            }
-            var error = new Tensor();
-            for (int i = _layers.Count - 1; i >= 0; i--)
-            {
-                error = _layers[i].Backward(error, i != 0);
+                for (int b = 0; b < dataSource.TotalBatches; b++)
+                {
+                    var data = dataSource.GetSampleBatch(b);
+                    for (int i = 0; i < _layers.Count; i++)
+                    {
+                        data = _layers[i].Forward(data);
+                    }
+                    var error = dataSource.GetLabelBatch(b);
+                    for (int i = _layers.Count - 1; i >= 0; i--)
+                    {
+                        error = _layers[i].Backward(error, i > 0);
+                    }
+                }
+                dataSource.Shuffle();
             }
         }
 

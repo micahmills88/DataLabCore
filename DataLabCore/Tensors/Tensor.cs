@@ -56,6 +56,7 @@ namespace DataLabCore
             var controller = TensorController.Instance;
             _buffer = controller.AllocateBuffer(Size);
             SynchronizeToRemote();
+            controller.Synchronize();
         }
         #endregion
 
@@ -83,9 +84,8 @@ namespace DataLabCore
 
         public void SetDataView(int start, int size)
         {
-            DataView = _buffer.GetSubView(start, size);
-
-            Size = DataView.Length;
+            var subview = _buffer.View.GetSubView(start, size);
+            DataView = subview;
         }
     }
 }

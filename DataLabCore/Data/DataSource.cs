@@ -7,7 +7,6 @@ namespace DataLabCore
 {
     public class DataSource
     {
-        bool flatten = true;
         int _width = 28;
         int _height = 28;
         int _depth = 1;
@@ -15,8 +14,10 @@ namespace DataLabCore
         int _samplecount = 60000;
         int _batchsize = 10;
 
+        public int TotalBatches { get {  return _samplecount / _batchsize; } }
+
         string samplePath = @"F:\Machine_Learning\Datasets\MNIST\train-images.idx3-ubyte";
-        string labelPath = @"F:\Machine_Learning\Datasets\MNIST\train-lables.idx1-ubyte";
+        string labelPath = @"F:\Machine_Learning\Datasets\MNIST\train-labels.idx1-ubyte";
 
         List<string> keys = new List<string>();
         Dictionary<string, float[]> data_labels = new Dictionary<string, float[]>();
@@ -56,6 +57,9 @@ namespace DataLabCore
             int offset = _width * _height * _batchsize;
             int start = batchnum * offset;
             sampleTensor.SetDataView(start, offset);
+            sampleTensor.Size = offset;
+            sampleTensor.Rows = _batchsize;
+            sampleTensor.Columns = _width * _height;
             return sampleTensor;
         }
 
@@ -64,6 +68,9 @@ namespace DataLabCore
             int offset = _classes * _batchsize;
             int start = batchnum * offset;
             labelTensor.SetDataView(start, offset);
+            labelTensor.Size = offset;
+            labelTensor.Rows = _batchsize;
+            labelTensor.Columns = _classes;
             return labelTensor;
         }
 

@@ -49,8 +49,8 @@ namespace DataLabCore
             _outputs = new Tensor(_batch_size, _output_count, new float[output_count]);
             _output_errors = new Tensor(_batch_size, _output_count, new float[output_count]);
 
-            var error_count = _batch_size * _input_count;
-            _input_errors = new Tensor(_batch_size, _input_count, new float[error_count]);
+            var error_count = _input_count * _batch_size;
+            _input_errors = new Tensor(_input_count, _batch_size, new float[error_count]);
         }
 
         public Tensor Forward(Tensor input)

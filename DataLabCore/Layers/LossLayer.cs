@@ -6,7 +6,9 @@ namespace DataLabCore
 {
     public enum LossFunction
     {
-        MSE
+        MeanSquared,
+        Logistic,
+        Multiclass
     }
 
     public class LossLayer : IModelLayer
@@ -15,28 +17,31 @@ namespace DataLabCore
         int _batch_size;
         LossFunction _loss_function;
 
+        Tensor _inputs;
+        Tensor _errors;
+        Tensor _epoch_error;
+
         public LossLayer(int inputSize, int batchSize, LossFunction lossFunction)
         {
             _input_size = inputSize;
             _batch_size = batchSize;
             _loss_function = lossFunction;
 
-            //build your own tensors for data storage
+            var error_size = _batch_size * _input_size;
+            _errors = new Tensor(_input_size, _batch_size, new float[error_size]);
+            _epoch_error = new Tensor(_batch_size, _input_size, new float[error_size]);
         }
 
-        public Tensor Forward(Tensor data)
+        public Tensor Forward(Tensor predictions)
         {
-            //store the reference to the input tensor
-            //the return values dont matter here
-            return data;
+            _inputs = predictions;
+            return predictions;
         }
 
-        public Tensor Backward(Tensor error, bool calculateInputErrors)
+        public Tensor Backward(Tensor labels, bool calculateInputErrors = true)
         {
-            //subtract the tensors
-            //perform any calculations
-            //store globally for epoch errors?
-            return error;
+            TensorController.Instance.CalculateLoss(_epoch_error, _errors, _inputs, labels, _loss_function);
+            return _errors;
         }
     }
 }

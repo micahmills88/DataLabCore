@@ -15,10 +15,15 @@ namespace DataLabCore
         public Action<ILGPU.Index, ArrayView<float>> DeriveSigmoid;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int> Transpose2D;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> MultiplyErrors;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> TransposedMatrixMultiply;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int> TransposedMatrixMultiply;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int> RowSums;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, float> AdjustMomentum;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, float> ApplyGradient;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> SubtractTransposed;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> SUM;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>> LogisticLoss;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>> MultiClassLoss;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>> MeanSquaredError;
 
         public TensorKernels(Accelerator accelerator)
         {
@@ -28,17 +33,22 @@ namespace DataLabCore
             DeriveSigmoid = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Derive_Sigmoid);
             Transpose2D = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int>(K_Transpose_2D);
             MultiplyErrors = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Multiply_Errors);
-            TransposedMatrixMultiply = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Transposed_Matrix_Multiply);
+            TransposedMatrixMultiply = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int>(K_Transposed_Matrix_Multiply);
             RowSums = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int>(K_Row_Sum);
             AdjustMomentum = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, float>(K_Adjust_Momentum);
             ApplyGradient = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, float>(K_Apply_Gradient);
+            SubtractTransposed = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Subtract_Transposed);
+            SUM = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Sum);
+            LogisticLoss = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Logistic_Loss);
+            MultiClassLoss = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Multi_Class_Loss);
+            MeanSquaredError = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Mean_Squared_Error);
         }
 
-        private void K_Matrix_Multiply(
+        static void K_Matrix_Multiply(
             ILGPU.Index index,
             ArrayView<float> output,
-            ArrayView<float> input,
-            ArrayView<float> weights,
+            ArrayView<float> left_values,
+            ArrayView<float> right_values,
             int input_columns,
             int out_columns
         )
@@ -50,64 +60,65 @@ namespace DataLabCore
             {
                 int leftIndex = outRow * input_columns + c;
                 int rightIndex = outColumn + (c * out_columns);
-                sum += input[leftIndex] * weights[rightIndex];
+                sum += left_values[leftIndex] * right_values[rightIndex];
             }
             output[index] = sum;
         }
 
-        private void K_Add_Bias(ILGPU.Index index, ArrayView<float> values, ArrayView<float> additions)
+        static void K_Add_Bias(ILGPU.Index index, ArrayView<float> values, ArrayView<float> additions)
         {
             int bias_index = index % additions.Length;
             values[index] = values[index] + additions[bias_index];
         }
 
-        private void K_Activate_Sigmoid(ILGPU.Index index, ArrayView<float> values)
+        static void K_Activate_Sigmoid(ILGPU.Index index, ArrayView<float> values)
         {
             values[index] = 1.0f / (1.0f + XMath.Exp(-values[index]));
         }
 
-        private void K_Derive_Sigmoid(ILGPU.Index index, ArrayView<float> values)
+        static void K_Derive_Sigmoid(ILGPU.Index index, ArrayView<float> values)
         {
             float item = values[index];
             values[index] = item * (1.0f - item);
         }
 
-        private void K_Transpose_2D(ILGPU.Index index, ArrayView<float> result, ArrayView<float> values, int rows, int cols)
-        {
-            int offset = index * rows;
-            for (int i = 0; i < rows; i++)
-            {
-                result[offset + i] = values[index + i * cols];
-            }
+        static void K_Transpose_2D(ILGPU.Index index, ArrayView<float> result, ArrayView<float> values, int rows, int cols)
+        { //2*10
+            int sourceRow = index % rows;
+            int sourceCol = index / rows;
+            int srcIndex = sourceRow * cols + sourceCol;
+            result[index] = values[srcIndex];
         }
 
-        private void K_Multiply_Errors(ILGPU.Index index, ArrayView<float> values, ArrayView<float> errors)
+        static void K_Multiply_Errors(ILGPU.Index index, ArrayView<float> values, ArrayView<float> errors)
         {
             values[index] = values[index] * errors[index];
         }
 
-        private void K_Transposed_Matrix_Multiply(
-            ILGPU.Index index,
-            ArrayView<float> output,
-            ArrayView<float> input,
-            ArrayView<float> errors,
-            int input_columns,
-            int out_columns
+        static void K_Transposed_Matrix_Multiply(
+            ILGPU.Index index, //30
+            ArrayView<float> output, //30
+            ArrayView<float> input, //1*3
+            ArrayView<float> errors, //10*1
+            int out_columns, //same as error rowcount //10
+            int err_columns, //same as error colcount //1
+            int input_columns //same as input colcount //3
         )
         {
+            //output dimensions should be 3*10
             int outRow = index / out_columns;
             int outColumn = index % out_columns;
             float sum = 0f;
-            for (int c = 0; c < out_columns; c++)
+            for (int c = 0; c < err_columns; c++)
             {
                 int leftIndex = outRow + (input_columns * c);
-                int rightIndex = outColumn * out_columns + c;
+                int rightIndex = outColumn * err_columns + c;
                 sum += input[leftIndex] * errors[rightIndex];
             }
             output[index] = sum;
         }
 
-        private void K_Row_Sum(ILGPU.Index index, ArrayView<float> sums, ArrayView<float> values, int columns)
+        static void K_Row_Sum(ILGPU.Index index, ArrayView<float> sums, ArrayView<float> values, int columns)
         {
             float sum = 0f;
             for (int i = 0; i < columns; i++)
@@ -118,14 +129,53 @@ namespace DataLabCore
             sums[index] = sum;
         }
 
-        private void K_Adjust_Momentum(ILGPU.Index index, ArrayView<float> momentum, ArrayView<float> errors, float batchMultiple)
+        static void K_Adjust_Momentum(ILGPU.Index index, ArrayView<float> momentum, ArrayView<float> errors, float batchMultiple)
         {
-            momentum[index] = momentum[index] * 0.9f + ((errors[index] * 1.0f) * batchMultiple);
+            momentum[index] = (momentum[index] * 0.9f) + ((errors[index] * 1.0f) * batchMultiple);
         }
 
-        private void K_Apply_Gradient(ILGPU.Index index, ArrayView<float> weights, ArrayView<float> gradient, float learning_rate)
+        static void K_Apply_Gradient(ILGPU.Index index, ArrayView<float> weights, ArrayView<float> gradient, float learning_rate)
         {
             weights[index] = weights[index] - (gradient[index] * learning_rate);
+        }
+
+        static void K_Subtract_Transposed(ILGPU.Index index, ArrayView<float> outputs, ArrayView<float> data, ArrayView<float> labels, int rows, int cols)
+        {
+            int offset = index * rows;
+            for (int i = 0; i < rows; i++)
+            {
+                outputs[offset + i] = data[index + i * cols] - labels[index + i * cols];
+            }
+        }
+
+        static void K_Sum(ILGPU.Index index, ArrayView<float> sums, ArrayView<float> values)
+        {
+            sums[index] = sums[index] + values[index];   
+        }
+
+        static void K_Logistic_Loss(ILGPU.Index index, ArrayView<float> results, ArrayView<float> values, ArrayView<float> expecteds)
+        {
+            //expected should be either zero or 1
+            float expected = expecteds[index];
+            float value = values[index];
+            float result = -1.0f * ((expected * (float)Math.Log(value)) + ((1f - expected) * (float)Math.Log(1f - value)));
+            results[index] += result;
+        }
+
+        static void K_Multi_Class_Loss(ILGPU.Index index, ArrayView<float> results, ArrayView<float> values, ArrayView<float> expecteds)
+        {
+            float expected = expecteds[index];
+            float value = values[index];
+            float result =  -1.0f * (float)Math.Log(value) * expected;
+            results[index] += result;
+        }
+
+        static void K_Mean_Squared_Error(ILGPU.Index index, ArrayView<float> results, ArrayView<float> values, ArrayView<float> expecteds)
+        {
+            float expected = expecteds[index];
+            float value = values[index];
+            float result = (value - expected) * (value - expected);
+            results[index] += result;
         }
     }
 }

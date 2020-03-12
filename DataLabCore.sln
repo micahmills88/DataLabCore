@@ -5,28 +5,42 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataLabCore", "DataLabCore\DataLabCore.csproj", "{38AE2949-1687-406A-B7EA-E54B66131D68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLabTest", "DataLabTest\DataLabTest.csproj", "{9273F14F-352C-44DF-B454-A54B94128666}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataLabTest", "DataLabTest\DataLabTest.csproj", "{9273F14F-352C-44DF-B454-A54B94128666}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLabConsole", "DataLabConsole\DataLabConsole.csproj", "{B1D78E5B-CDC2-494D-A1E1-94E6C91A52CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataLabConsole", "DataLabConsole\DataLabConsole.csproj", "{B1D78E5B-CDC2-494D-A1E1-94E6C91A52CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{38AE2949-1687-406A-B7EA-E54B66131D68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{38AE2949-1687-406A-B7EA-E54B66131D68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38AE2949-1687-406A-B7EA-E54B66131D68}.Debug|x64.ActiveCfg = Debug|x64
+		{38AE2949-1687-406A-B7EA-E54B66131D68}.Debug|x64.Build.0 = Debug|x64
 		{38AE2949-1687-406A-B7EA-E54B66131D68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38AE2949-1687-406A-B7EA-E54B66131D68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38AE2949-1687-406A-B7EA-E54B66131D68}.Release|x64.ActiveCfg = Release|x64
+		{38AE2949-1687-406A-B7EA-E54B66131D68}.Release|x64.Build.0 = Release|x64
 		{9273F14F-352C-44DF-B454-A54B94128666}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9273F14F-352C-44DF-B454-A54B94128666}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9273F14F-352C-44DF-B454-A54B94128666}.Debug|x64.ActiveCfg = Debug|x64
+		{9273F14F-352C-44DF-B454-A54B94128666}.Debug|x64.Build.0 = Debug|x64
 		{9273F14F-352C-44DF-B454-A54B94128666}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9273F14F-352C-44DF-B454-A54B94128666}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9273F14F-352C-44DF-B454-A54B94128666}.Release|x64.ActiveCfg = Release|x64
+		{9273F14F-352C-44DF-B454-A54B94128666}.Release|x64.Build.0 = Release|x64
 		{B1D78E5B-CDC2-494D-A1E1-94E6C91A52CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B1D78E5B-CDC2-494D-A1E1-94E6C91A52CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1D78E5B-CDC2-494D-A1E1-94E6C91A52CB}.Debug|x64.ActiveCfg = Debug|x64
+		{B1D78E5B-CDC2-494D-A1E1-94E6C91A52CB}.Debug|x64.Build.0 = Debug|x64
 		{B1D78E5B-CDC2-494D-A1E1-94E6C91A52CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1D78E5B-CDC2-494D-A1E1-94E6C91A52CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1D78E5B-CDC2-494D-A1E1-94E6C91A52CB}.Release|x64.ActiveCfg = Release|x64
+		{B1D78E5B-CDC2-494D-A1E1-94E6C91A52CB}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

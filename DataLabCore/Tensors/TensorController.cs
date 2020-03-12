@@ -1,6 +1,6 @@
 ﻿using ILGPU;
 using ILGPU.Runtime;
-using ILGPU.Runtime.Cuda;
+using ILGPU.Runtime.CPU;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,7 +17,7 @@ namespace DataLabCore
         {
             var context = new Context();
             context.EnableAlgorithms();
-            _accelerator = new CudaAccelerator(context);
+            _accelerator = new CPUAccelerator(context);
             _kernels = new TensorKernels(_accelerator);
         }
 
@@ -31,7 +31,7 @@ namespace DataLabCore
 
         public MemoryBuffer<float> AllocateBuffer(int size)
         {
-            return _accelerator.Allocate<float>(1);
+            return _accelerator.Allocate<float>(size);
         }
 
         public void DenseForward(Tensor result, Tensor inputs, Tensor weights, Tensor bias, ActivationType activationType)
@@ -59,7 +59,7 @@ namespace DataLabCore
 
         public void DenseLayerWeightUpdate(Tensor weights, Tensor weightErrors, Tensor weightMomentum, Tensor inputs, Tensor outputErrors, float batchMultiple, float learningRate)
         {
-            _kernels.TransposedMatrixMultiply(weightErrors.Size, weightErrors.DataView, inputs.DataView, outputErrors.DataView, inputs.Columns, outputErrors.Columns);
+            _kernels.TransposedMatrixMultiply(weightErrors.Size, weightErrors.DataView, inputs.DataView, outputErrors.DataView, outputErrors.Rows, outputErrors.Columns, inputs.Columns);
             _kernels.AdjustMomentum(weightMomentum.Size, weightMomentum.DataView, weightErrors.DataView, batchMultiple);
             _kernels.ApplyGradient(weights.Size, weights.DataView, weightMomentum.DataView, learningRate);
         }
@@ -69,6 +69,24 @@ namespace DataLabCore
             _kernels.RowSums(biasErrors.Size, biasErrors.DataView, outputErrors.DataView, outputErrors.Columns);
             _kernels.AdjustMomentum(biasMomentum.Size, biasMomentum.DataView, biasErrors.DataView, batchMultiple);
             _kernels.ApplyGradient(bias.Size, bias.DataView, biasMomentum.DataView, learningRate);
+        }
+
+        public void CalculateLoss(Tensor totalerrors, Tensor errors, Tensor data, Tensor labels, LossFunction lossFunction)
+        {
+            _kernels.SubtractTransposed(errors.Rows, errors.DataView, data.DataView, labels.DataView, data.Rows, data.Columns);
+            //all loss functions sum into the total errors
+            if(lossFunction == LossFunction.Logistic)
+            {
+                _kernels.LogisticLoss(totalerrors.Size, totalerrors.DataView, data.DataView, labels.DataView);
+            }
+            if(lossFunction == LossFunction.Multiclass)
+            {
+                _kernels.MultiClassLoss(totalerrors.Size, totalerrors.DataView, data.DataView, labels.DataView);
+            }
+            if(lossFunction == LossFunction.MeanSquared)
+            {
+                _kernels.MeanSquaredError(totalerrors.Size, totalerrors.DataView, data.DataView, labels.DataView);
+            }
         }
     }
 }
