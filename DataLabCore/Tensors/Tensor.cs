@@ -25,18 +25,16 @@ namespace DataLabCore
         protected bool localSynchronized = false;
 
         #region constructors
-        public Tensor() { }
+        public Tensor(TensorController controller, float[] inputs)
+            : this(controller, 1, inputs.Length, 1, 1, inputs) { }
 
-        public Tensor(float[] inputs)
-            : this(1, inputs.Length, 1, 1, inputs) { }
+        public Tensor(TensorController controller, int rows, int columns, float[] inputs)
+            : this(controller, rows, columns, 1, 1, inputs) { }
 
-        public Tensor(int rows, int columns, float[] inputs)
-            : this(rows, columns, 1, 1, inputs) { }
+        public Tensor(TensorController controller, int rows, int columns, int layers, float[] inputs)
+            : this(controller, rows, columns, layers, 1, inputs) { }
 
-        public Tensor(int rows, int columns, int layers, float[] inputs)
-            : this(rows, columns, layers, 1, inputs) { }
-
-        public Tensor(int rows, int cols, int lays, int cubes, float[] data)
+        public Tensor(TensorController controller, int rows, int cols, int lays, int cubes, float[] data)
         {
             Rows = rows;
             Columns = cols;
@@ -53,10 +51,9 @@ namespace DataLabCore
                 throw new Exception("Data length does not match Tensor size");
             }
 
-            var controller = TensorController.Instance;
             _buffer = controller.AllocateBuffer(Size);
+            _buffer.MemSetToZero();
             SynchronizeToRemote();
-            controller.Synchronize();
         }
         #endregion
 
@@ -82,10 +79,9 @@ namespace DataLabCore
             Columns = temp;
         }
 
-        public void SetDataView(int start, int size)
+        public void ZeroMemory()
         {
-            var subview = _buffer.View.GetSubView(start, size);
-            DataView = subview;
+            _buffer.MemSetToZero();
         }
     }
 }

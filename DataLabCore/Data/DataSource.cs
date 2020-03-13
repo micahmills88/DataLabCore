@@ -7,8 +7,10 @@ namespace DataLabCore
 {
     public class DataSource
     {
+        TensorController _controller;
         int _width = 28;
         int _height = 28;
+        int _sample_size = 28 * 28;
         int _depth = 1;
         int _classes = 10;
         int _samplecount = 60000;
@@ -23,12 +25,13 @@ namespace DataLabCore
         Dictionary<string, float[]> data_labels = new Dictionary<string, float[]>();
         Dictionary<string, float[]> data_samples = new Dictionary<string, float[]>();
 
-        Tensor sampleTensor;
-        Tensor labelTensor;
+        List<Tensor> sample_tensors = new List<Tensor>();
+        List<Tensor> label_tensors = new List<Tensor>();
 
-        public DataSource(int batchSize)
+        public DataSource(TensorController controller, int batchSize)
         {
-            this._batchsize = batchSize;
+            _controller = controller;
+            _batchsize = batchSize;
             BinaryReader training_images = new BinaryReader(new FileStream(samplePath, FileMode.Open));
             BinaryReader training_labels = new BinaryReader(new FileStream(labelPath, FileMode.Open));
 
@@ -50,64 +53,56 @@ namespace DataLabCore
             }
 
             BuildTensors();
+            SetTensorData();
         }
 
         public Tensor GetSampleBatch(int batchnum)
         {
-            int offset = _width * _height * _batchsize;
-            int start = batchnum * offset;
-            sampleTensor.SetDataView(start, offset);
-            sampleTensor.Size = offset;
-            sampleTensor.Rows = _batchsize;
-            sampleTensor.Columns = _width * _height;
-            return sampleTensor;
+            return sample_tensors[batchnum];
         }
 
         public Tensor GetLabelBatch(int batchnum)
         {
-            int offset = _classes * _batchsize;
-            int start = batchnum * offset;
-            labelTensor.SetDataView(start, offset);
-            labelTensor.Size = offset;
-            labelTensor.Rows = _batchsize;
-            labelTensor.Columns = _classes;
-            return labelTensor;
+            return label_tensors[batchnum];
         }
 
         public void Shuffle()
         {
             keys.Shuffle();
-            List<float> samples = new List<float>();
-            List<float> labels = new List<float>();
-            foreach (var key in keys)
-            {
-                samples.AddRange(data_samples[key]);
-                labels.AddRange(data_labels[key]);
-            }
-
-            sampleTensor.Data = samples.ToArray();
-            labelTensor.Data = labels.ToArray();
-
-            sampleTensor.SynchronizeToRemote();
-            labelTensor.SynchronizeToRemote();
-
-            sampleTensor.Rows = _batchsize;
-            labelTensor.Rows = _batchsize;
+            SetTensorData();
         }
 
         private void BuildTensors()
         {
-            List<float> samples = new List<float>();
-            List<float> labels = new List<float>();
-
-            foreach (var key in keys)
+            int batchCount = _samplecount / _batchsize;
+            int s_size = _batchsize * _sample_size;
+            int l_size = _batchsize * _classes;
+            for (int i = 0; i < batchCount; i++)
             {
-                samples.AddRange(data_samples[key]);
-                labels.AddRange(data_labels[key]);
+                sample_tensors.Add(new Tensor(_controller, _batchsize, _sample_size, new float[s_size]));
+                label_tensors.Add(new Tensor(_controller, _batchsize, _classes, new float[l_size]));
             }
+        }
 
-            sampleTensor = new Tensor(_samplecount, _width * _height, samples.ToArray());
-            labelTensor = new Tensor(_samplecount, _classes, labels.ToArray());
+        private void SetTensorData()
+        {
+            int batchCount = _samplecount / _batchsize;
+            for (int i = 0; i < batchCount; i++)
+            {
+                List<float> tempSample = new List<float>();
+                List<float> tempLabel = new List<float>();
+                for (int j = 0; j < _batchsize; j++)
+                {
+                    int keyIdx = i * _batchsize + j;
+                    var key = keys[keyIdx];
+                    tempSample.AddRange(data_samples[key]);
+                    tempLabel.AddRange(data_labels[key]);
+                }
+                sample_tensors[i].Data = tempSample.ToArray();
+                sample_tensors[i].SynchronizeToRemote();
+                label_tensors[i].Data = tempLabel.ToArray();
+                label_tensors[i].SynchronizeToRemote();
+            }
         }
     }
 }

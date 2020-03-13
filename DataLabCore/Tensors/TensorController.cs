@@ -1,6 +1,8 @@
 ﻿using ILGPU;
 using ILGPU.Runtime;
-using ILGPU.Runtime.CPU;
+using ILGPU.Runtime.Cuda;
+using ILGPU.Algorithms;
+using ILGPU.Algorithms.ScanReduceOperations;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,20 +11,16 @@ namespace DataLabCore
 {
     public class TensorController
     {
-        private static readonly TensorController _controllerInstance = new TensorController();
         private static Accelerator _accelerator;
         private static TensorKernels _kernels;
 
-        private TensorController()
+        public TensorController()
         {
             var context = new Context();
             context.EnableAlgorithms();
-            _accelerator = new CPUAccelerator(context);
+            _accelerator = new CudaAccelerator(context);
             _kernels = new TensorKernels(_accelerator);
         }
-
-        public static TensorController Instance { get { return _controllerInstance; } }
-
 
         public void Synchronize()
         {
@@ -38,17 +36,29 @@ namespace DataLabCore
         {
             _kernels.MatrixMultiply(result.Size, result.DataView, inputs.DataView, weights.DataView, inputs.Columns, weights.Columns);
             _kernels.AddBias(result.Size, result.DataView, bias.DataView);
-            //if activation == sigmoid
-            _kernels.ActivateSigmoid(result.Size, result.DataView);
-            //result.SynchronizeToLocal();
+            if(activationType == ActivationType.Sigmoid)
+            {
+                _kernels.ActivateSigmoid(result.Size, result.DataView);
+            }
+            if(activationType == ActivationType.Softmax)
+            {
+                _kernels.ActivateSoftmax(result.Rows, result.DataView, result.Columns);
+            }
+            
         }
 
         public void DenseOutputError(Tensor outputErrors, Tensor layerOutputs, Tensor errors, ActivationType activationType)
         {
             _kernels.Transpose2D(outputErrors.Size, outputErrors.DataView, layerOutputs.DataView, layerOutputs.Rows, layerOutputs.Columns);
             outputErrors.Transpose2DValues();
-            //if activation == sigmoid
-            _kernels.DeriveSigmoid(outputErrors.Size, outputErrors.DataView);
+            if(activationType == ActivationType.Sigmoid)
+            {
+                _kernels.DeriveSigmoid(outputErrors.Size, outputErrors.DataView);
+            }
+            if(activationType == ActivationType.Softmax)
+            {
+                _kernels.DeriveSoftmax(outputErrors.Size, outputErrors.DataView);
+            }
             _kernels.MultiplyErrors(outputErrors.Size, outputErrors.DataView, errors.DataView);
         }
 

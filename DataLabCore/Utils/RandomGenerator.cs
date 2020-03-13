@@ -6,7 +6,7 @@ namespace DataLabCore
 {
     public static class RandomGenerator
     {
-        private static Random random = new Random();
+        private static Random random = new Random(125);
 
         //gets a float from a gaussian distribution using box meuller
         public static float GetFloatN()

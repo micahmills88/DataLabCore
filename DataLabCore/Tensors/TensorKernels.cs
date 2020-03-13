@@ -12,7 +12,9 @@ namespace DataLabCore
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MatrixMultiply;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> AddBias;
         public Action<ILGPU.Index, ArrayView<float>> ActivateSigmoid;
+        public Action<ILGPU.Index, ArrayView<float>, int> ActivateSoftmax;
         public Action<ILGPU.Index, ArrayView<float>> DeriveSigmoid;
+        public Action<ILGPU.Index, ArrayView<float>> DeriveSoftmax;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int> Transpose2D;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> MultiplyErrors;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int> TransposedMatrixMultiply;
@@ -30,7 +32,9 @@ namespace DataLabCore
             MatrixMultiply = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Matrix_Multiply);
             AddBias = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Add_Bias);
             ActivateSigmoid = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Activate_Sigmoid);
+            ActivateSoftmax = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, int>(K_Activate_Softmax);
             DeriveSigmoid = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Derive_Sigmoid);
+            DeriveSoftmax = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Derive_Softmax);
             Transpose2D = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int>(K_Transpose_2D);
             MultiplyErrors = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Multiply_Errors);
             TransposedMatrixMultiply = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int>(K_Transposed_Matrix_Multiply);
@@ -82,6 +86,27 @@ namespace DataLabCore
             values[index] = item * (1.0f - item);
         }
 
+        static void K_Derive_Softmax(ILGPU.Index index, ArrayView<float> values)
+        {
+            values[index] = 1f;
+        }
+
+        static void K_Activate_Softmax(ILGPU.Index index, ArrayView<float> values, int columns)
+        {
+            int start = index * columns;
+            float rowSum = 0f;
+            for (int i = 0; i < columns; i++)
+            {
+                float value = XMath.Exp(values[start + i]);
+                rowSum += value;
+                values[start + i] = value;
+            }
+            for (int i = 0; i < columns; i++)
+            {
+                values[start + i] /= rowSum;
+            }
+        }
+
         static void K_Transpose_2D(ILGPU.Index index, ArrayView<float> result, ArrayView<float> values, int rows, int cols)
         { //2*10
             int sourceRow = index % rows;
@@ -131,7 +156,7 @@ namespace DataLabCore
 
         static void K_Adjust_Momentum(ILGPU.Index index, ArrayView<float> momentum, ArrayView<float> errors, float batchMultiple)
         {
-            momentum[index] = (momentum[index] * 0.9f) + ((errors[index] * 1.0f) * batchMultiple);
+            momentum[index] = (momentum[index] * 0.9f) + (0.1f *(errors[index] * batchMultiple));
         }
 
         static void K_Apply_Gradient(ILGPU.Index index, ArrayView<float> weights, ArrayView<float> gradient, float learning_rate)
@@ -166,7 +191,7 @@ namespace DataLabCore
         {
             float expected = expecteds[index];
             float value = values[index];
-            float result =  -1.0f * (float)Math.Log(value) * expected;
+            float result =  -1.0f * XMath.Log(value) * expected;
             results[index] += result;
         }
 

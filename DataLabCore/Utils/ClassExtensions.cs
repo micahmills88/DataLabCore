@@ -6,7 +6,7 @@ namespace DataLabCore
 {
     static class ClassExtensions
     {
-        private static Random rng = new Random();
+        private static Random rng = new Random(1);
         public static void Shuffle<T>(this IList<T> list)
         {
             //count through the list swapping each index with a random index
