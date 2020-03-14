@@ -25,12 +25,12 @@ namespace DataLabCore
             _layers.Add(layer);
         }
 
-        public void FitModel(DataSource dataSource, int epochs, float learningRate)
+        public void FitModel(IDataSource dataSource, int epochs, float learningRate)
         {
             for (int e = 0; e < epochs; e++)
             {
                 stopwatch.Restart();
-                for (int b = 0; b < dataSource.TotalBatches; b++)
+                for (int b = 0; b < dataSource.GetTotalBatches(); b++)
                 {
                     var data = dataSource.GetSampleBatch(b);
                     for (int i = 0; i < _layers.Count; i++)

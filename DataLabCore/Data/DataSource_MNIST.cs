@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public class DataSource
+    public class DataSource_MNIST : IDataSource
     {
         TensorController _controller;
         int _width = 28;
@@ -15,8 +15,6 @@ namespace DataLabCore
         int _classes = 10;
         int _samplecount = 60000;
         int _batchsize = 10;
-
-        public int TotalBatches { get {  return _samplecount / _batchsize; } }
 
         string samplePath = @"F:\Machine_Learning\Datasets\MNIST\train-images.idx3-ubyte";
         string labelPath = @"F:\Machine_Learning\Datasets\MNIST\train-labels.idx1-ubyte";
@@ -28,7 +26,7 @@ namespace DataLabCore
         List<Tensor> sample_tensors = new List<Tensor>();
         List<Tensor> label_tensors = new List<Tensor>();
 
-        public DataSource(TensorController controller, int batchSize)
+        public DataSource_MNIST(TensorController controller, int batchSize)
         {
             _controller = controller;
             _batchsize = batchSize;
@@ -64,6 +62,11 @@ namespace DataLabCore
         public Tensor GetLabelBatch(int batchnum)
         {
             return label_tensors[batchnum];
+        }
+
+        public int GetTotalBatches()
+        {
+            return _samplecount / _batchsize;
         }
 
         public void Shuffle()
