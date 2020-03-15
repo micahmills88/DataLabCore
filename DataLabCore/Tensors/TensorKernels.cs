@@ -7,7 +7,7 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public class TensorKernels
+    public partial class TensorKernels
     {
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MatrixMultiply;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> AddBias;
@@ -26,6 +26,10 @@ namespace DataLabCore
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>> LogisticLoss;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>> MultiClassLoss;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>> MeanSquaredError;
+
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> ForwardCorrelation;
+        public Action<ILGPU.Index, ArrayView<float>> ActivateReLU;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> DeriveReLU;
 
         public TensorKernels(Accelerator accelerator)
         {
@@ -46,6 +50,10 @@ namespace DataLabCore
             LogisticLoss = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Logistic_Loss);
             MultiClassLoss = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Multi_Class_Loss);
             MeanSquaredError = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Mean_Squared_Error);
+            
+            ForwardCorrelation = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Forward_Correlation);
+            ActivateReLU = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Activate_ReLU);
+            DeriveReLU = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Derive_ReLU);
         }
 
         static void K_Matrix_Multiply(

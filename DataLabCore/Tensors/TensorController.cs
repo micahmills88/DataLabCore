@@ -44,11 +44,19 @@ namespace DataLabCore
             {
                 _kernels.ActivateSoftmax(result.Rows, result.DataView, result.Columns);
             }
-            
+        }
+
+        public void ConvolutionForward(Tensor result, Tensor inputs, Tensor weights, Tensor bias, ActivationType activationType)
+        {
+            _kernels.ForwardCorrelation(result.Size, result.DataView, inputs.DataView, weights.DataView,
+                inputs.Rows, inputs.Columns, inputs.Layers, weights.Rows, weights.Columns, weights.Layers, weights.Cubes);
+            _kernels.AddBias(result.Size, result.DataView, bias.DataView);
+            _kernels.ActivateReLU(result.Size, result.DataView);
         }
 
         public void DenseOutputError(Tensor outputErrors, Tensor layerOutputs, Tensor errors, ActivationType activationType)
         {
+            //transpose copies the data to outputErrors
             _kernels.Transpose2D(outputErrors.Size, outputErrors.DataView, layerOutputs.DataView, layerOutputs.Rows, layerOutputs.Columns);
             outputErrors.Transpose2DValues();
             if(activationType == ActivationType.Sigmoid)
@@ -62,9 +70,20 @@ namespace DataLabCore
             _kernels.MultiplyErrors(outputErrors.Size, outputErrors.DataView, errors.DataView);
         }
 
+        public void ConvolutionOutputError(Tensor outputErrors, Tensor layerOutputs, Tensor errors, ActivationType activationType)
+        {
+            _kernels.DeriveReLU(outputErrors.Size, outputErrors.DataView, layerOutputs.DataView);
+            _kernels.MultiplyErrors(outputErrors.Size, outputErrors.DataView, errors.DataView);
+        }
+
         public void DenseInputError(Tensor inputErrors, Tensor weights, Tensor outputErrors)
         {
             _kernels.MatrixMultiply(inputErrors.Size, inputErrors.DataView, weights.DataView, outputErrors.DataView, weights.Columns, outputErrors.Columns);
+        }
+
+        public void ConvolutionInputError()
+        {
+
         }
 
         public void DenseLayerWeightUpdate(Tensor weights, Tensor weightErrors, Tensor weightMomentum, Tensor inputs, Tensor outputErrors, float batchMultiple, float learningRate)
