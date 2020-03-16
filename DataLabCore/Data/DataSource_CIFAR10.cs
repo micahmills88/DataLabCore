@@ -10,7 +10,7 @@ namespace DataLabCore
         TensorController _controller;
         int _width = 32;
         int _height = 32;
-        int _sample_size = 32*32;
+        int _sample_size = 32*32*3;
         int _depth = 3;
         int _classes = 10;
         int _samplecount = 10000;
@@ -18,7 +18,7 @@ namespace DataLabCore
 
         public int TotalBatches { get { return _samplecount / _batchsize; } }
 
-        string samplePath = @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_1.bin";
+        string samplePath = @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_3.bin";
 
         List<string> keys = new List<string>();
         Dictionary<string, float[]> data_labels = new Dictionary<string, float[]>();
@@ -78,7 +78,7 @@ namespace DataLabCore
             int l_size = _batchsize * _classes;
             for (int i = 0; i < batchCount; i++)
             {
-                sample_tensors.Add(new Tensor(_controller, _batchsize, _sample_size, new float[s_size]));
+                sample_tensors.Add(new Tensor(_controller, _width, _height, _depth, _batchsize, new float[s_size]));
                 label_tensors.Add(new Tensor(_controller, _batchsize, _classes, new float[l_size]));
             }
         }

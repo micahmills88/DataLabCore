@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DataLabCore
 {
-    class ConvolutionLayer : IModelLayer
+    public class ConvolutionLayer : IModelLayer
     {
         TensorController _controller;
 
@@ -16,6 +16,10 @@ namespace DataLabCore
         int _output_height;
         int _output_width;
         int _output_depth;
+
+        public int OutHeight { get => _output_height;}
+        public int OutWidth { get => _output_width; }
+        public int OutDepth { get => _output_depth; }
 
         int _batch_size;
         ActivationType _activation;
@@ -97,7 +101,7 @@ namespace DataLabCore
             float batchMultiple = (1.0f / (float)_batch_size);
             _controller.ConvolutionLayerWeightUpdate(_filter_weights, _filter_weights_errors, _momentum_filter_weights, _inputs, _output_errors, batchMultiple, learningRate);
             _controller.ConvolutionLayerBiasUpdate(_filter_bias, _filter_bias_errors, _momentum_filter_bias, _output_errors, batchMultiple, learningRate);
-            throw new NotImplementedException();
+            return _input_errors;
         }
     }
 }

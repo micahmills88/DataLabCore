@@ -117,7 +117,7 @@ namespace DataLabCore
 
         public void ConvolutionLayerBiasUpdate(Tensor bias, Tensor biasErrors, Tensor biasMomentum, Tensor outputErrors, float batchMultiple, float learningRate)
         {
-            _kernels.RowSums(biasErrors.Size, biasErrors.DataView, outputErrors.DataView, outputErrors.CubeSize);
+            _kernels.RowSums(outputErrors.Cubes, biasErrors.DataView, outputErrors.DataView, outputErrors.CubeSize);
             _kernels.AdjustMomentum(biasMomentum.Size, biasMomentum.DataView, biasErrors.DataView, batchMultiple);
             _kernels.ApplyGradient(bias.Size, bias.DataView, biasMomentum.DataView, learningRate);
         }

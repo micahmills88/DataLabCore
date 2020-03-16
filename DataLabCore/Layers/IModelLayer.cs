@@ -13,6 +13,7 @@ namespace DataLabCore
     public enum ActivationType
     {
         Sigmoid,
-        Softmax
+        Softmax,
+        ReLU
     }
 }
