@@ -81,9 +81,16 @@ namespace DataLabCore
             _kernels.MatrixMultiply(inputErrors.Size, inputErrors.DataView, weights.DataView, outputErrors.DataView, weights.Columns, outputErrors.Columns);
         }
 
-        public void ConvolutionInputError()
+        public void ConvolutionInputError(Tensor inputErrors, Tensor paddedErrors, Tensor outputErrors, Tensor invertedFilters, Tensor filters)
         {
-
+            var xpad = filters.Columns - 1;
+            var ypad = filters.Rows - 1;
+            int totalRows = outputErrors.Rows * outputErrors.Layers * outputErrors.Cubes;
+            _kernels.Pad(totalRows, paddedErrors.DataView, outputErrors.DataView, outputErrors.Columns, outputErrors.Rows, xpad, ypad);
+            int totalFilterLayers = filters.Layers * filters.Cubes;
+            _kernels.InvertFilter(totalFilterLayers, invertedFilters.DataView, filters.DataView, filters.LayerSize);
+            _kernels.InputErrorConvolution(inputErrors.Size, inputErrors.DataView, paddedErrors.DataView, invertedFilters.DataView,
+                paddedErrors.Rows, paddedErrors.Columns, paddedErrors.Layers, invertedFilters.Rows, invertedFilters.Columns, invertedFilters.Layers, invertedFilters.Cubes);
         }
 
         public void DenseLayerWeightUpdate(Tensor weights, Tensor weightErrors, Tensor weightMomentum, Tensor inputs, Tensor outputErrors, float batchMultiple, float learningRate)
@@ -93,9 +100,24 @@ namespace DataLabCore
             _kernels.ApplyGradient(weights.Size, weights.DataView, weightMomentum.DataView, learningRate);
         }
 
+        public void ConvolutionLayerWeightUpdate(Tensor filters, Tensor filterErrors, Tensor filterMomentum, Tensor inputs, Tensor outputErrors, float batchMultiple, float learningRate)
+        {
+            _kernels.WeightErrorCorrelation(filterErrors.Size, filterErrors.DataView, inputs.DataView, outputErrors.DataView,
+                inputs.Rows, inputs.Columns, inputs.Layers, inputs.Cubes, outputErrors.Rows, outputErrors.Columns, outputErrors.Layers);
+            _kernels.AdjustMomentum(filterMomentum.Size, filterMomentum.DataView, filterErrors.DataView, batchMultiple);
+            _kernels.ApplyGradient(filters.Size, filters.DataView, filterMomentum.DataView, learningRate);
+        }
+
         public void DenseLayerBiasUpdate(Tensor bias, Tensor biasErrors, Tensor biasMomentum, Tensor outputErrors, float batchMultiple, float learningRate)
         {
             _kernels.RowSums(biasErrors.Size, biasErrors.DataView, outputErrors.DataView, outputErrors.Columns);
+            _kernels.AdjustMomentum(biasMomentum.Size, biasMomentum.DataView, biasErrors.DataView, batchMultiple);
+            _kernels.ApplyGradient(bias.Size, bias.DataView, biasMomentum.DataView, learningRate);
+        }
+
+        public void ConvolutionLayerBiasUpdate(Tensor bias, Tensor biasErrors, Tensor biasMomentum, Tensor outputErrors, float batchMultiple, float learningRate)
+        {
+            _kernels.RowSums(biasErrors.Size, biasErrors.DataView, outputErrors.DataView, outputErrors.CubeSize);
             _kernels.AdjustMomentum(biasMomentum.Size, biasMomentum.DataView, biasErrors.DataView, batchMultiple);
             _kernels.ApplyGradient(bias.Size, bias.DataView, biasMomentum.DataView, learningRate);
         }

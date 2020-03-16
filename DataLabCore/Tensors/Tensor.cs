@@ -79,6 +79,19 @@ namespace DataLabCore
             Columns = temp;
         }
 
+        public void SetDimensions(int rows, int columns, int layers, int cubes)
+        {
+            int newsize = rows * columns * layers * cubes;
+            if(newsize != Size)
+            {
+                throw new Exception("Reshape failures, size must match");
+            }
+            Rows = rows;
+            Columns = columns;
+            Layers = layers;
+            Cubes = cubes;
+        }
+
         public void ZeroMemory()
         {
             _buffer.MemSetToZero();

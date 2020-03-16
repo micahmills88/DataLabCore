@@ -16,6 +16,8 @@ namespace DataLabCore
         int _output_height;
         int _output_width;
         int _output_depth;
+
+        int _batch_size;
         ActivationType _activation;
 
         Tensor _filter_weights;
@@ -33,7 +35,10 @@ namespace DataLabCore
         Tensor _input_errors;
         Tensor _output_errors;
 
-        public ConvolutionLayer(TensorController controller, int inputHeight, int inputWidth, int inputDepth, int filterHeight, int filterWidth, int filterCount, ActivationType layerActivation)
+        Tensor _padded_errors;
+        Tensor _inverted_filters;
+
+        public ConvolutionLayer(TensorController controller, int inputHeight, int inputWidth, int inputDepth, int filterHeight, int filterWidth, int filterCount, int batchSize, ActivationType layerActivation)
         {
             _controller = controller;
             _filter_height = filterHeight;
@@ -43,6 +48,8 @@ namespace DataLabCore
             _output_height = inputHeight - (filterHeight - 1);
             _output_width = inputWidth - (filterWidth - 1);
             _output_depth = filterCount;
+            _batch_size = batchSize;
+            _activation = layerActivation;
 
             int filterSize = _filter_height * _filter_width * _filter_depth * _filter_count;
             float weight_range = (float)Math.Sqrt(1.0d / (float)filterSize);
@@ -50,6 +57,7 @@ namespace DataLabCore
             _filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, weight_data);
             _momentum_filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
             _filter_weights_errors = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
+            _inverted_filters = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
 
             int biasSize = _output_height * _output_width * _output_depth;
             float[] filter_bias = RandomGenerator.GetFloatDistribution(biasSize, 0f, weight_range);
@@ -57,7 +65,19 @@ namespace DataLabCore
             _filter_bias_errors = new Tensor(_controller, _output_height, _output_width, _output_depth, new float[biasSize]);
             _momentum_filter_bias = new Tensor(_controller, _output_height, _output_width, _output_depth, new float[biasSize]);
 
-            _activation = layerActivation;
+            var output_size = _output_height * _output_width * _output_depth * batchSize;
+            _outputs = new Tensor(_controller, _output_height, _output_width, _output_depth, batchSize, new float[output_size]);
+            _output_errors = new Tensor(_controller, _output_height, _output_width, _output_depth, batchSize, new float[output_size]);
+
+            var input_size = inputHeight * inputWidth * inputDepth * batchSize;
+            _input_errors = new Tensor(_controller, inputHeight, inputWidth, inputDepth, batchSize, new float[input_size]);
+
+            var xpad = filterWidth - 1;
+            var ypad = filterHeight - 1;
+            var padded_width = _output_width + (xpad * 2);
+            var padded_height = _output_height + (ypad * 2);
+            var padded_size = padded_height * padded_width * _output_depth * batchSize;
+            _padded_errors = new Tensor(_controller, padded_width, padded_height, _output_depth, batchSize, new float[padded_size]);
         }
 
         public Tensor Forward(Tensor input)
@@ -69,17 +89,15 @@ namespace DataLabCore
 
         public Tensor Backward(Tensor errors, float learningRate, bool calculateInputErrors = true)
         {
-            //can reuse derive and multiply kernel to get output errors
             _controller.ConvolutionOutputError(_output_errors, _outputs, errors, _activation);
-            //need a pad2d
-            //need a filter invert
-            //need an input error convolution
-
-            //need weighterrorcorrelation
-            //momentum update appear the same
+            if(calculateInputErrors)
+            {
+                _controller.ConvolutionInputError(_input_errors, _padded_errors, _output_errors, _inverted_filters, _filter_weights);
+            }
+            float batchMultiple = (1.0f / (float)_batch_size);
+            _controller.ConvolutionLayerWeightUpdate(_filter_weights, _filter_weights_errors, _momentum_filter_weights, _inputs, _output_errors, batchMultiple, learningRate);
+            _controller.ConvolutionLayerBiasUpdate(_filter_bias, _filter_bias_errors, _momentum_filter_bias, _output_errors, batchMultiple, learningRate);
             throw new NotImplementedException();
         }
-
-
     }
 }

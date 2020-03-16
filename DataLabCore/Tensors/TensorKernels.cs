@@ -30,6 +30,10 @@ namespace DataLabCore
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> ForwardCorrelation;
         public Action<ILGPU.Index, ArrayView<float>> ActivateReLU;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> DeriveReLU;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int, int, int> Pad;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int> InvertFilter;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> InputErrorConvolution;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> WeightErrorCorrelation;
 
         public TensorKernels(Accelerator accelerator)
         {
@@ -54,6 +58,10 @@ namespace DataLabCore
             ForwardCorrelation = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Forward_Correlation);
             ActivateReLU = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Activate_ReLU);
             DeriveReLU = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Derive_ReLU);
+            Pad = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int, int, int>(K_Pad);
+            InvertFilter = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int>(K_Invert_Filter);
+            InputErrorConvolution = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Input_Error_Convolution);
+            WeightErrorCorrelation = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Input_Error_Convolution);
         }
 
         static void K_Matrix_Multiply(
