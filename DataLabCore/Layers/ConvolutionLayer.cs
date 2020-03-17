@@ -55,8 +55,9 @@ namespace DataLabCore
             _batch_size = batchSize;
             _activation = layerActivation;
 
+            float weight_range = (float)Math.Sqrt(2.0d / (float)(inputHeight * inputWidth * inputDepth));
+
             int filterSize = _filter_height * _filter_width * _filter_depth * _filter_count;
-            float weight_range = (float)Math.Sqrt(1.0d / (float)filterSize);
             var weight_data = RandomGenerator.GetFloatDistribution(filterSize, 0f, weight_range);
             _filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, weight_data);
             _momentum_filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);

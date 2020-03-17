@@ -35,6 +35,9 @@ namespace DataLabCore
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> InputErrorConvolution;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> WeightErrorCorrelation;
 
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MaxPoolForward;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MaxPoolBackward;
+
         public TensorKernels(Accelerator accelerator)
         {
             MatrixMultiply = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Matrix_Multiply);
@@ -62,6 +65,9 @@ namespace DataLabCore
             InvertFilter = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int>(K_Invert_Filter);
             InputErrorConvolution = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Input_Error_Convolution);
             WeightErrorCorrelation = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Weight_Error_Correlation);
+
+            MaxPoolForward = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Max_Pool_Forward);
+            MaxPoolBackward = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Max_Pool_Backward);
         }
 
         static void K_Matrix_Multiply(

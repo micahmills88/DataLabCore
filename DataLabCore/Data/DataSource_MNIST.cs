@@ -82,7 +82,7 @@ namespace DataLabCore
             int l_size = _batchsize * _classes;
             for (int i = 0; i < batchCount; i++)
             {
-                sample_tensors.Add(new Tensor(_controller, _batchsize, _sample_size, new float[s_size]));
+                sample_tensors.Add(new Tensor(_controller, _width, _height, _depth, _batchsize, new float[s_size]));
                 label_tensors.Add(new Tensor(_controller, _batchsize, _classes, new float[l_size]));
             }
         }

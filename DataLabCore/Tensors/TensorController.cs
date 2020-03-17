@@ -44,6 +44,10 @@ namespace DataLabCore
             {
                 _kernels.ActivateSoftmax(result.Rows, result.DataView, result.Columns);
             }
+            if(activationType == ActivationType.ReLU)
+            {
+                _kernels.ActivateReLU(result.Size, result.DataView);
+            }
         }
 
         public void ConvolutionForward(Tensor result, Tensor inputs, Tensor weights, Tensor bias, ActivationType activationType)
@@ -66,6 +70,10 @@ namespace DataLabCore
             if(activationType == ActivationType.Softmax)
             {
                 _kernels.DeriveSoftmax(outputErrors.Size, outputErrors.DataView);
+            }
+            if(activationType == ActivationType.ReLU)
+            {
+                _kernels.DeriveReLU(outputErrors.Size, outputErrors.DataView, outputErrors.DataView);
             }
             _kernels.MultiplyErrors(outputErrors.Size, outputErrors.DataView, errors.DataView);
         }
@@ -138,6 +146,16 @@ namespace DataLabCore
             {
                 _kernels.MeanSquaredError(totalerrors.Size, totalerrors.DataView, data.DataView, labels.DataView);
             }
+        }
+
+        public void MaxPoolForward(Tensor inputs, Tensor outputs, Tensor mask)
+        {
+            _kernels.MaxPoolForward(outputs.Size, mask.DataView, outputs.DataView, inputs.DataView, outputs.Columns, inputs.Columns);
+        }
+
+        public void MaxPoolBackward(Tensor inputErrors, Tensor mask, Tensor errors)
+        {
+            _kernels.MaxPoolBackward(errors.Size, mask.DataView, inputErrors.DataView, errors.DataView, errors.Columns, inputErrors.Columns);
         }
     }
 }

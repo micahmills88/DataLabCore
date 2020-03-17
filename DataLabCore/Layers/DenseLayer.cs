@@ -13,6 +13,8 @@ namespace DataLabCore
         int _batch_size;
         ActivationType _activation;
 
+        public int OutCount { get => _output_count; }
+
         Tensor _weights;
         Tensor _bias;
 
@@ -38,7 +40,7 @@ namespace DataLabCore
             _activation = activationType;
 
             
-            float weight_range = (float)Math.Sqrt(1.0d / (float)_input_count);
+            float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
             var weight_count = _input_count * _output_count;
             var weight_data = RandomGenerator.GetFloatDistribution(weight_count, 0f, weight_range);
             _weights = new Tensor(_controller, _input_count, _output_count, weight_data);

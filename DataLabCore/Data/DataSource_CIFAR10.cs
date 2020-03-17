@@ -10,15 +10,21 @@ namespace DataLabCore
         TensorController _controller;
         int _width = 32;
         int _height = 32;
-        int _sample_size = 32*32*3;
+        int _sample_size = 32 * 32 * 3;
         int _depth = 3;
         int _classes = 10;
-        int _samplecount = 10000;
+        int _samplecount = 50000;
         int _batchsize = 10;
 
         public int TotalBatches { get { return _samplecount / _batchsize; } }
 
-        string samplePath = @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_3.bin";
+        string[] samplePaths = new string[] {
+            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_1.bin",
+            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_2.bin",
+            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_3.bin",
+            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_4.bin",
+            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_5.bin"
+        };
 
         List<string> keys = new List<string>();
         Dictionary<string, float[]> data_labels = new Dictionary<string, float[]>();
@@ -31,19 +37,22 @@ namespace DataLabCore
         {
             _controller = controller;
             _batchsize = batchSize;
-            BinaryReader training_data = new BinaryReader(new FileStream(samplePath, FileMode.Open));
-            Console.WriteLine("Loading samples for training...");
-            for (int i = 0; i < _samplecount; i++)
+            foreach(var samplePath in samplePaths)
             {
-                int labelByte = training_data.ReadByte();
-                byte[] imageBytes = training_data.ReadBytes(_width * _height * _depth);
-                float[] sample = Array.ConvertAll(imageBytes, item => (float)(item / 255f));
-                float[] label = new float[_classes];
-                label[labelByte] = 1.0f;
-                string guid = Guid.NewGuid().ToString("N");
-                keys.Add(guid);
-                data_labels.Add(guid, label);
-                data_samples.Add(guid, sample);
+                BinaryReader training_data = new BinaryReader(new FileStream(samplePath, FileMode.Open));
+                Console.WriteLine("Loading samples from {0}", samplePath);
+                for (int i = 0; i < 10000; i++)
+                {
+                    int labelByte = training_data.ReadByte();
+                    byte[] imageBytes = training_data.ReadBytes(_width * _height * _depth);
+                    float[] sample = Array.ConvertAll(imageBytes, item => (float)(item / 255f));
+                    float[] label = new float[_classes];
+                    label[labelByte] = 1.0f;
+                    string guid = Guid.NewGuid().ToString("N");
+                    keys.Add(guid);
+                    data_labels.Add(guid, label);
+                    data_samples.Add(guid, sample);
+                }
             }
 
             BuildTensors();

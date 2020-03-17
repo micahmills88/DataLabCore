@@ -215,5 +215,68 @@ namespace DataLabCore
                 inverted[dstIdx] = normal[srcIdx];
             }
         }
+
+        static void K_Max_Pool_Forward(
+            ILGPU.Index index,          //total number of outputs
+            ArrayView<float> mask,      //same size as inputs
+            ArrayView<float> outputs,   //1/4th the size of inputs
+            ArrayView<float> inputs,    //same size as mask
+            int out_cols,               //out cols is half the in cols
+            int in_cols
+        )
+        {
+            //read 4 values from the inputs
+            int outRow = index / out_cols;
+            int outCol = index % out_cols;
+
+            int inputOffset = (outRow * (in_cols * 2)) + (outCol * 2);
+
+            float in_0 = inputs[inputOffset];
+            float in_1 = inputs[inputOffset + 1];
+            float in_2 = inputs[inputOffset + in_cols];
+            float in_3 = inputs[inputOffset + in_cols + 1];
+
+            int maxIndexOffset = inputOffset;
+            float max = in_0;
+            if(in_1 > max)
+            {
+                max = in_1;
+                maxIndexOffset = inputOffset + 1;
+            }
+            if(in_2 > max)
+            {
+                max = in_2;
+                maxIndexOffset = inputOffset + in_cols;
+            }
+            if (in_3 > max)
+            {
+                max = in_3;
+                maxIndexOffset = inputOffset + in_cols + 1;
+            }
+
+            mask[maxIndexOffset] = 1f;
+            outputs[index] = max;
+        }
+
+        static void K_Max_Pool_Backward(
+            ILGPU.Index index,          //same as error size
+            ArrayView<float> mask,      //same size as values
+            ArrayView<float> values,    //values to be returned
+            ArrayView<float> errors,
+            int err_cols,
+            int val_cols
+        )
+        {
+            //read 4 values from the inputs
+            int errRow = index / err_cols;
+            int errCol = index % err_cols;
+
+            int valueOffset = (errRow * (val_cols * 2)) + (errCol * 2);
+
+            values[valueOffset]                 = errors[index] * mask[valueOffset];
+            values[valueOffset + 1]             = errors[index] * mask[valueOffset + 1];
+            values[valueOffset + val_cols]      = errors[index] * mask[valueOffset + val_cols];
+            values[valueOffset + val_cols + 1]  = errors[index] * mask[valueOffset + val_cols + 1];
+        }
     }
 }

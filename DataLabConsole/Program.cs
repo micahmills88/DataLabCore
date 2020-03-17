@@ -7,26 +7,34 @@ namespace DataLabConsole
     {
         static void Main(string[] args)
         {
-            int batch_size = 100;
+            int batch_size = 50;
             float learning_rate = 1f;
             TensorController tc = new TensorController();
             ModelBuilder builder = new ModelBuilder();
 
-            var c1 = new ConvolutionLayer(tc, 32, 32, 3, 10, 10, 64, batch_size, ActivationType.ReLU);
-            //var c2 = new ConvolutionLayer(tc, c1.OutHeight, c1.OutWidth, c1.OutDepth, 3, 3, 32, batch_size, ActivationType.ReLU);
-            //var c3 = new ConvolutionLayer(tc, c2.OutHeight, c2.OutWidth, c2.OutDepth, 3, 3, 64, batch_size, ActivationType.ReLU);
-            //var c4 = new ConvolutionLayer(tc, c3.OutHeight, c3.OutWidth, c3.OutDepth, 3, 3, 64, batch_size, ActivationType.ReLU);
-            //var fl = new FlattenLayer(c4.OutHeight, c4.OutWidth, c4.OutDepth, batch_size);
-            var fl = new FlattenLayer(c1.OutHeight, c1.OutWidth, c1.OutDepth, batch_size);
+            var c1 = new ConvolutionLayer(tc, 32, 32, 3, 3, 3, 32, batch_size, ActivationType.ReLU);
+            var c2 = new ConvolutionLayer(tc, c1.OutHeight, c1.OutWidth, c1.OutDepth, 3, 3, 32, batch_size, ActivationType.ReLU);
+            var mp1 = new MaxPoolLayer(tc, c2.OutHeight, c2.OutWidth, c2.OutDepth, batch_size);
+
+            var c3 = new ConvolutionLayer(tc, mp1.OutHeight, mp1.OutWidth, mp1.OutDepth, 3, 3, 64, batch_size, ActivationType.ReLU);
+            var c4 = new ConvolutionLayer(tc, c3.OutHeight, c3.OutWidth, c3.OutDepth, 3, 3, 64, batch_size, ActivationType.ReLU);
+            var mp2 = new MaxPoolLayer(tc, c4.OutHeight, c4.OutWidth, c4.OutDepth, batch_size);
+
+            var fl = new FlattenLayer(mp2.OutHeight, mp2.OutWidth, mp2.OutDepth, batch_size);
+            var d1 = new DenseLayer(tc, fl.OutSize, 128, batch_size, ActivationType.ReLU);
+            var d2 = new DenseLayer(tc, d1.OutCount, 10, batch_size, ActivationType.Softmax);
+            var l1 = new LossLayer(tc, d2.OutCount, batch_size, 50000, LossFunction.Multiclass);
 
             builder.AddLayer(c1);
-            //builder.AddLayer(c2);
-            //builder.AddLayer(c3);
-            //builder.AddLayer(c4);
+            builder.AddLayer(c2);
+            builder.AddLayer(mp1);
+            builder.AddLayer(c3);
+            builder.AddLayer(c4);
+            builder.AddLayer(mp2);
             builder.AddLayer(fl);
-            builder.AddLayer(new DenseLayer(tc, fl.OutSize, 2048, batch_size, ActivationType.Sigmoid));
-            builder.AddLayer(new DenseLayer(tc, 2048, 10, batch_size, ActivationType.Softmax));
-            builder.AddLayer(new LossLayer(tc, 10, batch_size, 10000, LossFunction.Multiclass));
+            builder.AddLayer(d1);
+            builder.AddLayer(d2);
+            builder.AddLayer(l1);
             builder.FitModel(new DataSource_CIFAR10(tc, batch_size), 100, learning_rate);
 
             Console.WriteLine("Done");
