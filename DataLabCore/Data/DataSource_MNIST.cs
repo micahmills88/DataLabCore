@@ -16,6 +16,11 @@ namespace DataLabCore
         int _samplecount = 60000;
         int _batchsize = 10;
 
+        public int OutHeight { get => _height; }
+        public int OutWidth { get => _width; }
+        public int OutDepth { get => _depth; }
+        public int Samples { get => _samplecount; }
+
         string samplePath = @"F:\Machine_Learning\Datasets\MNIST\train-images.idx3-ubyte";
         string labelPath = @"F:\Machine_Learning\Datasets\MNIST\train-labels.idx1-ubyte";
 

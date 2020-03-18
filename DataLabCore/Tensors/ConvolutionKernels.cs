@@ -44,7 +44,7 @@ namespace DataLabCore
             int filterCubeIndex = outLayerIndex * right_cubesize;
 
             float sum = 0f;
-            for (int l = 0; l < right_lays; l++)
+            for (int l = 0; l < right_lays; l++) //foreach layer of the filter (should match input layers per cube)
             {
                 int sourceLayerIndex = sourceCubeIndex + (l * left_layersize);
                 int filterLayerIndex = filterCubeIndex + (l * right_layersize);
@@ -192,7 +192,7 @@ namespace DataLabCore
 
             int destRowSize = (xpad * 2) + val_cols;
             int paddingSize = destRowSize * ypad;
-            int layerSize = (destRowSize * val_rows) + paddingSize;
+            int layerSize = (destRowSize * val_rows) + (paddingSize * 2);
 
             int startIndex = paddingSize + (destLayer * layerSize) + ypad;
 
@@ -277,6 +277,18 @@ namespace DataLabCore
             values[valueOffset + 1]             = errors[index] * mask[valueOffset + 1];
             values[valueOffset + val_cols]      = errors[index] * mask[valueOffset + val_cols];
             values[valueOffset + val_cols + 1]  = errors[index] * mask[valueOffset + val_cols + 1];
+        }
+
+        static void K_Sum_Cubes(ILGPU.Index index, ArrayView<float> sums, ArrayView<float> values, int cubeCount, int cubeSize)
+        {
+            //index is same as cubesize
+            float sum = 0f;
+            for (int i = 0; i < cubeCount; i++)
+            {
+                int idx = i * cubeSize + index;
+                sum += values[i];
+            }
+            sums[index] = sum;
         }
     }
 }

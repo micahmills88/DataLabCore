@@ -13,17 +13,22 @@ namespace DataLabCore
         int _sample_size = 32 * 32 * 3;
         int _depth = 3;
         int _classes = 10;
-        int _samplecount = 50000;
+        int _samplecount = 30000;
         int _batchsize = 10;
+
+        public int OutHeight { get => _height; }
+        public int OutWidth { get => _width; }
+        public int OutDepth { get => _depth; }
+        public int Samples { get => _samplecount; }
 
         public int TotalBatches { get { return _samplecount / _batchsize; } }
 
         string[] samplePaths = new string[] {
             @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_1.bin",
             @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_2.bin",
-            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_3.bin",
-            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_4.bin",
-            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_5.bin"
+            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_3.bin"
+            //@"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_4.bin",
+            //@"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_5.bin"
         };
 
         List<string> keys = new List<string>();
@@ -57,6 +62,7 @@ namespace DataLabCore
 
             BuildTensors();
             SetTensorData();
+            Console.WriteLine("Data Loaded...");
         }
 
         public Tensor GetSampleBatch(int batchnum)

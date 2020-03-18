@@ -33,11 +33,11 @@ namespace DataLabCore
                 for (int b = 0; b < dataSource.GetTotalBatches(); b++)
                 {
                     var data = dataSource.GetSampleBatch(b);
+                    var error = dataSource.GetLabelBatch(b);
                     for (int i = 0; i < _layers.Count; i++)
                     {
                         data = _layers[i].Forward(data);
                     }
-                    var error = dataSource.GetLabelBatch(b);
                     for (int i = _layers.Count - 1; i >= 0; i--)
                     {
                         error = _layers[i].Backward(error, learningRate, i > 0);

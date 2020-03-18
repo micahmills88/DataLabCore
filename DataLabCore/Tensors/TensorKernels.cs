@@ -34,6 +34,7 @@ namespace DataLabCore
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int> InvertFilter;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> InputErrorConvolution;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> WeightErrorCorrelation;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int> SumCubes;
 
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MaxPoolForward;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MaxPoolBackward;
@@ -65,6 +66,7 @@ namespace DataLabCore
             InvertFilter = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int>(K_Invert_Filter);
             InputErrorConvolution = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Input_Error_Convolution);
             WeightErrorCorrelation = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Weight_Error_Correlation);
+            SumCubes = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int>(K_Sum_Cubes);
 
             MaxPoolForward = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Max_Pool_Forward);
             MaxPoolBackward = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Max_Pool_Backward);
@@ -153,8 +155,8 @@ namespace DataLabCore
         )
         {
             //output dimensions should be 3*10
-            int outRow = index / out_columns;
-            int outColumn = index % out_columns;
+            int outRow = index % out_columns;
+            int outColumn = index / out_columns;
             float sum = 0f;
             for (int c = 0; c < err_columns; c++)
             {
@@ -168,10 +170,10 @@ namespace DataLabCore
         static void K_Row_Sum(ILGPU.Index index, ArrayView<float> sums, ArrayView<float> values, int columns)
         {
             float sum = 0f;
+            int startIndex = index * columns;
             for (int i = 0; i < columns; i++)
             {
-                int idx = columns * index + i;
-                sum += values[idx];
+                sum += values[startIndex + i];
             }
             sums[index] = sum;
         }
@@ -183,7 +185,7 @@ namespace DataLabCore
 
         static void K_Apply_Gradient(ILGPU.Index index, ArrayView<float> weights, ArrayView<float> gradient, float learning_rate)
         {
-            weights[index] = weights[index] - (gradient[index] * learning_rate);
+            weights[index] -= (gradient[index] * learning_rate);
         }
 
         static void K_Subtract_Transposed(ILGPU.Index index, ArrayView<float> outputs, ArrayView<float> data, ArrayView<float> labels, int rows, int cols)

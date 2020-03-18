@@ -1,6 +1,7 @@
 ﻿using ILGPU;
 using ILGPU.Runtime;
 using ILGPU.Runtime.Cuda;
+using ILGPU.Runtime.CPU;
 using ILGPU.Algorithms;
 using ILGPU.Algorithms.ScanReduceOperations;
 using System;
@@ -9,19 +10,33 @@ using System.Text;
 
 namespace DataLabCore
 {
+    public enum ControllerType
+    {
+        CUDA,
+        CPU
+    }
+
     public class TensorController
     {
         private static Accelerator _accelerator;
         private static TensorKernels _kernels;
 
-        public TensorController()
+        public TensorController(ControllerType ct)
         {
             var context = new Context();
             context.EnableAlgorithms();
-            _accelerator = new CudaAccelerator(context);
+            if(ct == ControllerType.CPU)
+            {
+                _accelerator = new CPUAccelerator(context);
+            }
+            if(ct == ControllerType.CUDA)
+            {
+                _accelerator = new CudaAccelerator(context);
+            }
             _kernels = new TensorKernels(_accelerator);
         }
 
+        #region layer methods
         public void Synchronize()
         {
             _accelerator.Synchronize();
@@ -125,7 +140,7 @@ namespace DataLabCore
 
         public void ConvolutionLayerBiasUpdate(Tensor bias, Tensor biasErrors, Tensor biasMomentum, Tensor outputErrors, float batchMultiple, float learningRate)
         {
-            _kernels.RowSums(outputErrors.Cubes, biasErrors.DataView, outputErrors.DataView, outputErrors.CubeSize);
+            _kernels.SumCubes(biasErrors.Size, biasErrors.DataView, outputErrors.DataView, outputErrors.Cubes, biasErrors.Size);
             _kernels.AdjustMomentum(biasMomentum.Size, biasMomentum.DataView, biasErrors.DataView, batchMultiple);
             _kernels.ApplyGradient(bias.Size, bias.DataView, biasMomentum.DataView, learningRate);
         }
@@ -157,5 +172,34 @@ namespace DataLabCore
         {
             _kernels.MaxPoolBackward(errors.Size, mask.DataView, inputErrors.DataView, errors.DataView, errors.Columns, inputErrors.Columns);
         }
+        #endregion layer methods
+
+        #region raw methods
+        public void MatrixMultiply(Tensor result, Tensor left, Tensor right)
+        {
+            _kernels.MatrixMultiply(result.Size, result.DataView, left.DataView, right.DataView, left.Columns, right.Columns);
+        }
+
+        public void AddBias(Tensor result, Tensor bias)
+        {
+            _kernels.AddBias(result.Size, result.DataView, bias.DataView);
+        }
+
+        public void Transpose2D(Tensor result, Tensor input)
+        {
+            _kernels.Transpose2D(result.Size, result.DataView, input.DataView, input.Rows, input.Columns);
+            result.Transpose2DValues();
+        }
+
+        public void TransposedMatrixMultiply(Tensor outputs, Tensor left, Tensor right)
+        {
+            _kernels.TransposedMatrixMultiply(outputs.Size, outputs.DataView, left.DataView, right.DataView, outputs.Columns, right.Columns, left.Columns);
+        }
+
+        public void RowSum(Tensor result, Tensor values)
+        {
+            _kernels.RowSums(result.Size, result.DataView, values.DataView, values.Columns);
+        }
+        #endregion raw methods
     }
 }
