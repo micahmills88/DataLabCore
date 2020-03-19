@@ -190,11 +190,10 @@ namespace DataLabCore
 
         static void K_Subtract_Transposed(ILGPU.Index index, ArrayView<float> outputs, ArrayView<float> data, ArrayView<float> labels, int rows, int cols)
         {
-            int offset = index * rows;
-            for (int i = 0; i < rows; i++)
-            {
-                outputs[offset + i] = data[index + i * cols] - labels[index + i * cols];
-            }
+            int sourceRow = index % rows;
+            int sourceCol = index / rows;
+            int srcIndex = sourceRow * cols + sourceCol;
+            outputs[index] = data[srcIndex] - labels[srcIndex];
         }
 
         static void K_Sum(ILGPU.Index index, ArrayView<float> sums, ArrayView<float> values)

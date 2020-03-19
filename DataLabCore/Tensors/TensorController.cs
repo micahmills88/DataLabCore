@@ -147,7 +147,7 @@ namespace DataLabCore
 
         public void CalculateLoss(Tensor totalerrors, Tensor errors, Tensor data, Tensor labels, LossFunction lossFunction)
         {
-            _kernels.SubtractTransposed(errors.Rows, errors.DataView, data.DataView, labels.DataView, data.Rows, data.Columns);
+            _kernels.SubtractTransposed(errors.Size, errors.DataView, data.DataView, labels.DataView, data.Rows, data.Columns);
             //all loss functions sum into the total errors
             if(lossFunction == LossFunction.Logistic)
             {
@@ -199,6 +199,24 @@ namespace DataLabCore
         public void RowSum(Tensor result, Tensor values)
         {
             _kernels.RowSums(result.Size, result.DataView, values.DataView, values.Columns);
+        }
+
+        public void SubtractTransposed(Tensor errors, Tensor data, Tensor labels)
+        {
+            _kernels.SubtractTransposed(errors.Size, errors.DataView, data.DataView, labels.DataView, data.Rows, data.Columns);
+        }
+
+
+        public void ForwardCorrelation(Tensor output, Tensor input, Tensor filters)
+        {
+            _kernels.ForwardCorrelation(output.Size, output.DataView, input.DataView, filters.DataView,
+                input.Rows, input.Columns, input.Layers, filters.Rows, filters.Columns, filters.Layers, filters.Cubes);
+        }
+
+        public void BackwardConvolution(Tensor result, Tensor errors, Tensor filters)
+        {
+            _kernels.InputErrorConvolution(result.Size, result.DataView, errors.DataView, filters.DataView,
+                errors.Rows, errors.Columns, errors.Layers, filters.Rows, filters.Columns, filters.Layers, filters.Cubes);
         }
         #endregion raw methods
     }

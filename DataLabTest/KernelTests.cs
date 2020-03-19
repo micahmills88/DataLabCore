@@ -153,5 +153,69 @@ namespace DataLabTest
             t2.SynchronizeToLocal();
             Assert.Equal(expected, t2.Data);
         }
+
+        [Fact]
+        public void Test_SubtractTransposed()
+        {
+            float[] data = new float[]
+            {
+                1,1,1,1,1,
+                2,2,2,2,2,
+                3,3,3,3,3
+            };
+
+            float[] lbl = new float[]
+            {
+                0.1f, 0.1f, 0.1f, 0.1f, 0.1f,
+                0.2f, 0.2f, 0.2f, 0.2f, 0.2f,
+                0.3f, 0.3f, 0.3f, 0.3f, 0.3f
+            };
+
+            float[] transposed = new float[]
+            {
+                0.9f, 1.8f, 2.7f,
+                0.9f, 1.8f, 2.7f,
+                0.9f, 1.8f, 2.7f,
+                0.9f, 1.8f, 2.7f,
+                0.9f, 1.8f, 2.7f
+            };
+
+            Tensor t1 = new Tensor(_tc, 3, 5, data);
+            Tensor t2 = new Tensor(_tc, 3, 5, lbl);
+            Tensor t3 = new Tensor(_tc, 5, 3, new float[data.Length]);
+            _tc.SubtractTransposed(t3, t1, t2);
+            t3.SynchronizeToLocal();
+            Assert.Equal(transposed, t3.Data);
+        }
+
+        [Fact]
+        public void Test_ForwardCorrelation()
+        {
+            CorrelationCalculator calc = new CorrelationCalculator();
+            calc.CalculateResults();
+
+            Tensor t1 = new Tensor(_tc, 8, 8, 3, 5, calc.inputs.Data);
+            Tensor t2 = new Tensor(_tc, 3, 3, 3, 7, calc.filters.Data);
+            Tensor t3 = new Tensor(_tc, 6, 6, 7, 5, new float[6 * 6 * 7 * 5]);
+
+            _tc.ForwardCorrelation(t3, t1, t2);
+            t3.SynchronizeToLocal();
+            Assert.Equal(calc.results.Data, t3.Data);
+        }
+
+        [Fact]
+        public void Test_BackwardConvolution()
+        {
+            var calc = new BackwardConvolutionCalculator();
+            calc.CalculateResults();
+
+            Tensor t1 = new Tensor(_tc, 10, 10, 7, 5, calc.errors.Data);
+            Tensor t2 = new Tensor(_tc, 3, 3, 3, 7, calc.filters.Data);
+            Tensor t3 = new Tensor(_tc, 8, 8, 3, 5, new float[8*8*3*5]);
+
+            _tc.BackwardConvolution(t3, t1, t2);
+            t3.SynchronizeToLocal();
+            Assert.Equal(calc.results.Data, t3.Data);
+        }
     }
 }
