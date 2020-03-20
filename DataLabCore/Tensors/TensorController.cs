@@ -218,6 +218,29 @@ namespace DataLabCore
             _kernels.InputErrorConvolution(result.Size, result.DataView, errors.DataView, filters.DataView,
                 errors.Rows, errors.Columns, errors.Layers, filters.Rows, filters.Columns, filters.Layers, filters.Cubes);
         }
+
+        public void WeightErrorCorrelation(Tensor result, Tensor inputs, Tensor errors)
+        {
+            _kernels.WeightErrorCorrelation(result.Size, result.DataView, inputs.DataView, errors.DataView,
+                inputs.Rows, inputs.Columns, inputs.Layers, inputs.Cubes, errors.Rows, errors.Columns, errors.Layers);
+        }
+
+        public void PadTensor(Tensor result, Tensor inputs, int xpad, int ypad)
+        {
+            int totalRows = inputs.Rows * inputs.Layers * inputs.Cubes;
+            _kernels.Pad(totalRows, result.DataView, inputs.DataView, inputs.Columns, inputs.Rows, xpad, ypad);
+        }
+
+        public void InvertFilters(Tensor result, Tensor filters)
+        {
+            int totalFilterLayers = filters.Layers * filters.Cubes;
+            _kernels.InvertFilter(totalFilterLayers, result.DataView, filters.DataView, filters.LayerSize);
+        }
+
+        public void SumCubes(Tensor output, Tensor input)
+        {
+            _kernels.SumCubes(output.Size, output.DataView, input.DataView, input.Cubes, output.Size);
+        }
         #endregion raw methods
     }
 }

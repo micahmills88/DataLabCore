@@ -55,17 +55,18 @@ namespace DataLabCore
             _batch_size = batchSize;
             _activation = layerActivation;
 
-            float weight_range = (float)Math.Sqrt(2.0d / (float)(inputHeight * inputWidth * inputDepth));
+            //he_normal for relu
+            float weight_range = (float)Math.Sqrt(2.0d / (float)(filterHeight * filterWidth * _filter_depth));
 
             int filterSize = _filter_height * _filter_width * _filter_depth * _filter_count;
-            var weight_data = RandomGenerator.GetFloatDistribution(filterSize, 0f, weight_range);
+            var weight_data = RandomGenerator.GetFloatNormalDistribution(filterSize, 0f, weight_range);
             _filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, weight_data);
             _momentum_filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
             _filter_weights_errors = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
             _inverted_filters = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
 
             int biasSize = _output_height * _output_width * _output_depth;
-            float[] filter_bias = RandomGenerator.GetFloatDistribution(biasSize, 0f, weight_range);
+            float[] filter_bias = new float[biasSize]; // RandomGenerator.GetFloatUniformDistribution(biasSize, -weight_range, weight_range);
             _filter_bias = new Tensor(_controller, _output_height, _output_width, _output_depth, filter_bias);
             _filter_bias_errors = new Tensor(_controller, _output_height, _output_width, _output_depth, new float[biasSize]);
             _momentum_filter_bias = new Tensor(_controller, _output_height, _output_width, _output_depth, new float[biasSize]);

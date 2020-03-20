@@ -163,23 +163,18 @@ namespace DataLabCore
             output[index] = sum;
         }
 
-            static void K_Activate_ReLU(ILGPU.Index index, ArrayView<float> values)
+        static void K_Activate_ReLU(ILGPU.Index index, ArrayView<float> values)
         {
-            //leaky relu
             float value = values[index];
-            if(value <= 0f)
-            {
-                values[index] = 0.1f * value;
-            }
+            values[index] = ILGPU.Algorithms.XMath.Max(value, 0f);
         }
 
         static void K_Derive_ReLU(ILGPU.Index index, ArrayView<float> results, ArrayView<float> values)
         {
-            //leaky relu
             float result = 1.0f;
             if (values[index] <= 0f)
             {
-                result = 0.1f;
+                result = 0f;
             }
             results[index] = result;
         }
@@ -286,7 +281,7 @@ namespace DataLabCore
             for (int i = 0; i < cubeCount; i++)
             {
                 int idx = i * cubeSize + index;
-                sum += values[i];
+                sum += values[idx];
             }
             sums[index] = sum;
         }

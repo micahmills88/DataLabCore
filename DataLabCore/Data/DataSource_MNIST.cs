@@ -57,6 +57,7 @@ namespace DataLabCore
 
             BuildTensors();
             SetTensorData();
+            Console.WriteLine("Loading done...");
         }
 
         public Tensor GetSampleBatch(int batchnum)

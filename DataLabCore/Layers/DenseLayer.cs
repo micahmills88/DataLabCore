@@ -39,15 +39,31 @@ namespace DataLabCore
             _batch_size = batchSize;
             _activation = activationType;
 
-            
-            float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
+            //default is glorot (sigmoid)
+            float weight_range = (float)Math.Sqrt(1.0d / (float)_input_count);
+            bool isRelu = activationType == ActivationType.ReLU;
+
             var weight_count = _input_count * _output_count;
-            var weight_data = RandomGenerator.GetFloatDistribution(weight_count, 0f, weight_range);
+            float[] weight_data;
+            float[] bias_data;
+            if(isRelu)
+            {
+                weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
+                weight_data = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
+                bias_data = new float[_output_count];//RandomGenerator.GetFloatUniformDistribution(_output_count, -weight_range, weight_range);
+            }
+            else
+            {
+                weight_data = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
+                bias_data = RandomGenerator.GetFloatNormalDistribution(_output_count, 0f, weight_range);
+            }
+
+
             _weights = new Tensor(_controller, _input_count, _output_count, weight_data);
             _momentum_weights = new Tensor(_controller, _input_count, _output_count, new float[weight_count]);
             _weights_errors = new Tensor(_controller, _input_count, _output_count, new float[weight_count]);
 
-            _bias = new Tensor(_controller, RandomGenerator.GetFloatDistribution(_output_count, 0f, weight_range));
+            _bias = new Tensor(_controller, bias_data);
             _momentum_bias = new Tensor(_controller, new float[_output_count]);
             _bias_errors = new Tensor(_controller, new float[_output_count]);
 

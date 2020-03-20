@@ -24,12 +24,28 @@ namespace DataLabCore
             return (float)(randStdNormal * deviation + mean);
         }
 
-        public static float[] GetFloatDistribution(int count, float mean, float deviation)
+        public static float GetFloat(float lower, float upper)
+        {
+            double d = random.NextDouble() * (upper - lower) + lower;
+            return (float)d;
+        }
+
+        public static float[] GetFloatNormalDistribution(int count, float mean, float deviation)
         {
             float[] out_data = new float[count];
             for (int i = 0; i < count; i++)
             {
                 out_data[i] = GetFloatN(mean, deviation);
+            }
+            return out_data;
+        }
+
+        public static float[] GetFloatUniformDistribution(int count, float lower, float upper)
+        {
+            float[] out_data = new float[count];
+            for (int i = 0; i < count; i++)
+            {
+                out_data[i] = GetFloat(lower, upper);
             }
             return out_data;
         }

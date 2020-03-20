@@ -115,6 +115,16 @@ namespace DataLabTest
             return new TestTensor(left.Rows, left.Columns, left.Layers, left.Cubes, result);
         }
 
+        public static TestTensor operator +(TestTensor left, TestTensor right)
+        {
+            var result = new float[left.Size];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = left.Data[i] + right.Data[i];
+            }
+            return new TestTensor(left.Rows, left.Columns, left.Layers, left.Cubes, result);
+        }
+
         public float Sum()
         {
             float sum = 0f;
