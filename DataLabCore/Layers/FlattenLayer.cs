@@ -6,6 +6,7 @@ namespace DataLabCore
 {
     public class FlattenLayer : IModelLayer
     {
+        TensorController _controller;
         int _input_rows;
         int _input_columns;
         int _input_layers;
@@ -17,30 +18,33 @@ namespace DataLabCore
         Tensor _forward;
         Tensor _backward;
 
-        public FlattenLayer(int inputHeight, int inputWidth, int inputDepth, int batchSize)
+        public FlattenLayer(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize)
         {
+            _controller = tc;
+
             _input_rows = inputHeight;
             _input_columns = inputWidth;
             _input_layers = inputDepth;
             _input_cubes = batchSize;
 
             _output_size = inputDepth * inputHeight * inputWidth;
+            var fullsize = inputDepth * inputHeight * inputWidth * batchSize;
+
+            _forward = new Tensor(tc, batchSize, _output_size, new float[fullsize]);
+            _backward = new Tensor(tc, _input_rows, _input_columns, _input_layers, _input_cubes, new float[fullsize]);
         }
 
         public Tensor Forward(Tensor data)
         {
-            _forward = data;
-            _backward?.SetDimensions(data.Cubes, data.CubeSize, 1, 1);
-            data.SetDimensions(data.Cubes, data.CubeSize, 1, 1);
-            return data;
+            _forward.CopyDataFrom(data);
+            return _forward;
         }
 
         public Tensor Backward(Tensor data, float learningRate, bool errorsNeeded = false)
         {
-            _backward = data;
-            _forward?.SetDimensions(_input_rows, _input_columns, _input_layers, _input_cubes);
-            data.SetDimensions(_input_rows, _input_columns, _input_layers, _input_cubes);
-            return data;
+            //_backward.CopyDataFrom(data);
+            _controller.Transpose2D(_backward, data, false);
+            return _backward;
         }
     }
 }

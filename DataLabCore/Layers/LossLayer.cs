@@ -12,7 +12,7 @@ namespace DataLabCore
         Multiclass
     }
 
-    public class LossLayer : IModelLayer
+    public class LossLayer
     {
         TensorController _controller;
 
@@ -21,7 +21,6 @@ namespace DataLabCore
         int _epoch_size;
         LossFunction _loss_function;
 
-        Tensor _inputs;
         Tensor _errors;
         Tensor _epoch_error;
 
@@ -38,15 +37,9 @@ namespace DataLabCore
             _epoch_error = new Tensor(_controller, _batch_size, _input_size, new float[error_size]);
         }
 
-        public Tensor Forward(Tensor predictions)
+        public Tensor CalculateLoss(Tensor predictions, Tensor labels)
         {
-            _inputs = predictions;
-            return predictions;
-        }
-
-        public Tensor Backward(Tensor labels, float learningRate, bool calculateInputErrors = true)
-        {
-            _controller.CalculateLoss(_epoch_error, _errors, _inputs, labels, _loss_function);
+            _controller.CalculateLoss(_epoch_error, _errors, predictions, labels, _loss_function);
             return _errors;
         }
 

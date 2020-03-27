@@ -16,4 +16,10 @@ namespace DataLabCore
         Softmax,
         ReLU
     }
+
+    public enum PaddingType
+    {
+        None,
+        Same
+    }
 }

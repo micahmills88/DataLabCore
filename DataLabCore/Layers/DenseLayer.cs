@@ -13,7 +13,7 @@ namespace DataLabCore
         int _batch_size;
         ActivationType _activation;
 
-        public int OutCount { get => _output_count; }
+        public int OutSize { get => _output_count; }
 
         Tensor _weights;
         Tensor _bias;
@@ -40,7 +40,6 @@ namespace DataLabCore
             _activation = activationType;
 
             //default is glorot (sigmoid)
-            float weight_range = (float)Math.Sqrt(1.0d / (float)_input_count);
             bool isRelu = activationType == ActivationType.ReLU;
 
             var weight_count = _input_count * _output_count;
@@ -48,12 +47,13 @@ namespace DataLabCore
             float[] bias_data;
             if(isRelu)
             {
-                weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
+                float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
                 weight_data = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
                 bias_data = new float[_output_count];//RandomGenerator.GetFloatUniformDistribution(_output_count, -weight_range, weight_range);
             }
             else
             {
+                float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
                 weight_data = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
                 bias_data = RandomGenerator.GetFloatNormalDistribution(_output_count, 0f, weight_range);
             }

@@ -13,7 +13,7 @@ namespace DataLabCore
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> AddBias;
         public Action<ILGPU.Index, ArrayView<float>> ActivateSigmoid;
         public Action<ILGPU.Index, ArrayView<float>, int> ActivateSoftmax;
-        public Action<ILGPU.Index, ArrayView<float>> DeriveSigmoid;
+        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> DeriveSigmoid;
         public Action<ILGPU.Index, ArrayView<float>> DeriveSoftmax;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int> Transpose2D;
         public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> MultiplyErrors;
@@ -45,7 +45,7 @@ namespace DataLabCore
             AddBias = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Add_Bias);
             ActivateSigmoid = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Activate_Sigmoid);
             ActivateSoftmax = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, int>(K_Activate_Softmax);
-            DeriveSigmoid = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Derive_Sigmoid);
+            DeriveSigmoid = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Derive_Sigmoid);
             DeriveSoftmax = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Derive_Softmax);
             Transpose2D = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int>(K_Transpose_2D);
             MultiplyErrors = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Multiply_Errors);
@@ -82,13 +82,15 @@ namespace DataLabCore
         )
         {
             int outRow = index / out_columns;
-            int outColumn = index % out_columns;
+            int outCol = index % out_columns;
+            int leftOffset = outRow * input_columns;
+
             float sum = 0f;
             for (int c = 0; c < input_columns; c++)
             {
-                int leftIndex = outRow * input_columns + c;
-                int rightIndex = outColumn + (c * out_columns);
-                sum += left_values[leftIndex] * right_values[rightIndex];
+                int leftIdx = leftOffset + c;
+                int rightIdx = outCol + (c * out_columns);
+                sum += left_values[leftIdx] * right_values[rightIdx];
             }
             output[index] = sum;
         }
@@ -104,10 +106,10 @@ namespace DataLabCore
             values[index] = 1.0f / (1.0f + XMath.Exp(-values[index]));
         }
 
-        static void K_Derive_Sigmoid(ILGPU.Index index, ArrayView<float> values)
+        static void K_Derive_Sigmoid(ILGPU.Index index, ArrayView<float> outputs, ArrayView<float> inputs)
         {
-            float item = values[index];
-            values[index] = item * (1.0f - item);
+            float item = inputs[index];
+            outputs[index] = item * (1.0f - item);
         }
 
         static void K_Derive_Softmax(ILGPU.Index index, ArrayView<float> values)
@@ -155,8 +157,8 @@ namespace DataLabCore
         )
         {
             //output dimensions should be 3*10
-            int outRow = index % out_columns;
-            int outColumn = index / out_columns;
+            int outRow = index / out_columns;
+            int outColumn = index % out_columns;
             float sum = 0f;
             for (int c = 0; c < err_columns; c++)
             {

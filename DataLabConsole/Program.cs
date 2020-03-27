@@ -7,33 +7,32 @@ namespace DataLabConsole
     {
         static void Main(string[] args)
         {
-            int batch_size = 100;
-            float learning_rate = 1f;
+            int batch_size = 50;
+            float learning_rate = 0.001f;
             TensorController tc = new TensorController(ControllerType.CUDA);
             ModelBuilder builder = new ModelBuilder();
 
             var ds = new DataSource_CIFAR10(tc, batch_size);
             //var ds = new DataSource_MNIST(tc, batch_size);
 
-            var c1 = new ConvolutionLayer(tc, ds.OutHeight, ds.OutWidth, ds.OutDepth, 3, 3, 32, batch_size, ActivationType.ReLU);
-            var c2 = new ConvolutionLayer(tc, c1.OutHeight, c1.OutWidth, c1.OutDepth, 3, 3, 32, batch_size, ActivationType.ReLU);
-            var mp1 = new MaxPoolLayer(tc, c2.OutHeight, c2.OutWidth, c2.OutDepth, batch_size);
+            var conv1 = new ConvolutionLayer(tc, ds.OutHeight, ds.OutWidth, ds.OutDepth, 3, 3, 32, batch_size, ActivationType.ReLU, PaddingType.None);
+            var conv2 = new ConvolutionLayer(tc, conv1.OutHeight, conv1.OutWidth, conv1.OutDepth, 3, 3, 32, batch_size, ActivationType.ReLU, PaddingType.None);
+            var pool1 = new MaxPoolLayer(tc, conv2.OutHeight, conv2.OutWidth, conv2.OutDepth, batch_size);
 
-            var fl = new FlattenLayer(mp1.OutHeight, mp1.OutWidth, mp1.OutDepth, batch_size);
-            var d1 = new DenseLayer(tc, fl.OutSize, 1024, batch_size, ActivationType.ReLU);
-            var d2 = new DenseLayer(tc, d1.OutCount, 10, batch_size, ActivationType.Softmax);
-            var l1 = new LossLayer(tc, d2.OutCount, batch_size, ds.Samples, LossFunction.Multiclass);
+            var flat = new FlattenLayer(tc, pool1.OutHeight, pool1.OutWidth, pool1.OutDepth, batch_size);
+            var dense = new DenseLayer(tc, flat.OutSize, 128, batch_size, ActivationType.ReLU);
+            var softmax = new DenseLayer(tc, dense.OutSize, 10, batch_size, ActivationType.Softmax);
+            var loss = new LossLayer(tc, softmax.OutSize, batch_size, ds.Samples, LossFunction.Multiclass);
 
-            builder.AddLayer(c1);
-            builder.AddLayer(c2);
-            builder.AddLayer(mp1);
+            builder.AddLayer(conv1);
+            builder.AddLayer(conv2);
+            builder.AddLayer(pool1);
 
-            builder.AddLayer(fl);
-            builder.AddLayer(d1);
-            builder.AddLayer(d2);
-            builder.AddLayer(l1);
-
-            builder.FitModel(ds, 100, learning_rate);
+            builder.AddLayer(flat);
+            builder.AddLayer(dense);
+            builder.AddLayer(softmax);
+            builder.AddLossLayer(loss);
+            builder.FitModel(ds, 10000, learning_rate);
 
             Console.WriteLine("Done");
             Console.ReadLine();

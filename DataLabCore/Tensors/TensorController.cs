@@ -70,7 +70,14 @@ namespace DataLabCore
             _kernels.ForwardCorrelation(result.Size, result.DataView, inputs.DataView, weights.DataView,
                 inputs.Rows, inputs.Columns, inputs.Layers, weights.Rows, weights.Columns, weights.Layers, weights.Cubes);
             _kernels.AddBias(result.Size, result.DataView, bias.DataView);
-            _kernels.ActivateReLU(result.Size, result.DataView);
+            if(activationType == ActivationType.ReLU)
+            {
+                _kernels.ActivateReLU(result.Size, result.DataView);
+            }
+            if (activationType == ActivationType.Sigmoid)
+            {
+                _kernels.ActivateSigmoid(result.Size, result.DataView);
+            }
         }
 
         public void DenseOutputError(Tensor outputErrors, Tensor layerOutputs, Tensor errors, ActivationType activationType)
@@ -80,7 +87,7 @@ namespace DataLabCore
             outputErrors.Transpose2DValues();
             if(activationType == ActivationType.Sigmoid)
             {
-                _kernels.DeriveSigmoid(outputErrors.Size, outputErrors.DataView);
+                _kernels.DeriveSigmoid(outputErrors.Size, outputErrors.DataView, outputErrors.DataView);
             }
             if(activationType == ActivationType.Softmax)
             {
@@ -95,7 +102,14 @@ namespace DataLabCore
 
         public void ConvolutionOutputError(Tensor outputErrors, Tensor layerOutputs, Tensor errors, ActivationType activationType)
         {
-            _kernels.DeriveReLU(outputErrors.Size, outputErrors.DataView, layerOutputs.DataView);
+            if(activationType == ActivationType.ReLU)
+            {
+                _kernels.DeriveReLU(outputErrors.Size, outputErrors.DataView, layerOutputs.DataView);
+            }
+            if(activationType == ActivationType.Sigmoid)
+            {
+                _kernels.DeriveSigmoid(outputErrors.Size, outputErrors.DataView, layerOutputs.DataView);
+            }
             _kernels.MultiplyErrors(outputErrors.Size, outputErrors.DataView, errors.DataView);
         }
 
@@ -106,8 +120,8 @@ namespace DataLabCore
 
         public void ConvolutionInputError(Tensor inputErrors, Tensor paddedErrors, Tensor outputErrors, Tensor invertedFilters, Tensor filters)
         {
-            var xpad = filters.Columns - 1;
-            var ypad = filters.Rows - 1;
+            var xpad = (paddedErrors.Columns - outputErrors.Columns) / 2;
+            var ypad = (paddedErrors.Rows - outputErrors.Rows) / 2;
             int totalRows = outputErrors.Rows * outputErrors.Layers * outputErrors.Cubes;
             _kernels.Pad(totalRows, paddedErrors.DataView, outputErrors.DataView, outputErrors.Columns, outputErrors.Rows, xpad, ypad);
             int totalFilterLayers = filters.Layers * filters.Cubes;
@@ -185,10 +199,13 @@ namespace DataLabCore
             _kernels.AddBias(result.Size, result.DataView, bias.DataView);
         }
 
-        public void Transpose2D(Tensor result, Tensor input)
+        public void Transpose2D(Tensor result, Tensor input, bool setValues = true)
         {
             _kernels.Transpose2D(result.Size, result.DataView, input.DataView, input.Rows, input.Columns);
-            result.Transpose2DValues();
+            if(setValues)
+            {
+                result.Transpose2DValues();
+            }
         }
 
         public void TransposedMatrixMultiply(Tensor outputs, Tensor left, Tensor right)
@@ -240,6 +257,11 @@ namespace DataLabCore
         public void SumCubes(Tensor output, Tensor input)
         {
             _kernels.SumCubes(output.Size, output.DataView, input.DataView, input.Cubes, output.Size);
+        }
+
+        public void SoftMax(Tensor outputs)
+        {
+            _kernels.ActivateSoftmax(outputs.Rows, outputs.DataView, outputs.Columns);
         }
         #endregion raw methods
     }

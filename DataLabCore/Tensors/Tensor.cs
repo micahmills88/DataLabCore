@@ -96,5 +96,10 @@ namespace DataLabCore
         {
             _buffer.MemSetToZero();
         }
+
+        public void CopyDataFrom(Tensor other)
+        {
+            _buffer.CopyFrom(other._buffer, 0);
+        }
     }
 }

@@ -15,6 +15,8 @@ namespace DataLabCore
         List<IModelLayer> _layers = new List<IModelLayer>();
         Stopwatch stopwatch = new Stopwatch();
 
+        LossLayer _loss_layer;
+
         public ModelBuilder()
         {
 
@@ -25,31 +27,52 @@ namespace DataLabCore
             _layers.Add(layer);
         }
 
+        public void AddLossLayer(LossLayer losslayer)
+        {
+            _loss_layer = losslayer;
+        }
+
         public void FitModel(IDataSource dataSource, int epochs, float learningRate)
         {
+            if(_loss_layer == null)
+            {
+                throw new Exception("no loss layer");
+            }
+
             for (int e = 0; e < epochs; e++)
             {
+                
                 stopwatch.Restart();
-                for (int b = 0; b < dataSource.GetTotalBatches(); b++)
+                float percent = 0f;
+                Console.CursorVisible = false;
+                Console.Write("Epoch: {0} ... %{1:N0}", e, percent);
+                var batches = dataSource.GetTotalBatches();
+                for (int b = 0; b < batches; b++)
                 {
                     var data = dataSource.GetSampleBatch(b);
-                    var error = dataSource.GetLabelBatch(b);
+                    var labels = dataSource.GetLabelBatch(b);
                     for (int i = 0; i < _layers.Count; i++)
                     {
                         data = _layers[i].Forward(data);
                     }
+                    var errors = _loss_layer.CalculateLoss(data, labels);
                     for (int i = _layers.Count - 1; i >= 0; i--)
                     {
-                        error = _layers[i].Backward(error, learningRate, i > 0);
+                        errors = _layers[i].Backward(errors, learningRate, i > 0);
+                    }
+                    if (b % 25 == 0)
+                    {
+                        percent = 100f * (b + 1f) / (float)batches;
+                        Console.SetCursorPosition(0, Console.CursorTop);
+                        Console.Write("Epoch: {0} ... %{1:N0}", e, percent);
                     }
                 }
-                
-                var losslayer = (LossLayer)(_layers.Last() as LossLayer);
-                var loss = losslayer.GetEpochLoss();
-                stopwatch.Stop();
-                Console.WriteLine("Epoch: {0} Time: {1} Loss: {2}", e, stopwatch.ElapsedMilliseconds, loss);
-                //need to calculate errors
 
+                Console.CursorVisible = true;
+                var loss = _loss_layer.GetEpochLoss();
+                stopwatch.Stop();
+                Console.SetCursorPosition(0, Console.CursorTop);
+                Console.WriteLine("Epoch: {0:D3} Time: {1} Loss: {2}", e, stopwatch.ElapsedMilliseconds, loss);
                 dataSource.Shuffle();
             }
         }

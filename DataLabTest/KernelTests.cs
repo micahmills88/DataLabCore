@@ -78,17 +78,17 @@ namespace DataLabTest
         {
             float[] input = new float[]
             {
-                1,1,1,1,1,
-                2,2,2,2,2,
-                3,3,3,3,3
+                1,1,1,0,1,
+                2,5,2,8,2,
+                4,3,3,7,3
             };
 
             float[] transposed = new float[]
             {
+                1,2,4,
+                1,5,3,
                 1,2,3,
-                1,2,3,
-                1,2,3,
-                1,2,3,
+                0,8,7,
                 1,2,3
             };
 
@@ -102,32 +102,7 @@ namespace DataLabTest
         [Fact]
         public void Test_TransposedMatrixMultiply()
         {
-            float[] ma = new float[]
-            {
-                3,4,2,
-                6,5,7
-            };
 
-            float[] mb = new float[]
-            {
-                -2,3,
-                6,4,
-                1,-1
-            };
-
-            float[] mc = new float[]
-            {
-                20, 23,
-                25, 31
-            };
-
-            Tensor t1 = new Tensor(_tc, 2, 3, ma);
-            Tensor t2 = new Tensor(_tc, 3, 2, mb);
-            Tensor t3 = new Tensor(_tc, 2, 2, new float[4]);
-
-            _tc.TransposedMatrixMultiply(t3, t2, t1);
-            t3.SynchronizeToLocal();
-            Assert.Equal(mc, t3.Data);
         }
 
         [Fact]
@@ -159,9 +134,9 @@ namespace DataLabTest
         {
             float[] data = new float[]
             {
-                1,1,1,1,1,
-                2,2,2,2,2,
-                3,3,3,3,3
+                1,1,1,2,1,
+                4,5,2,2,2,
+                3,3,3,9,7
             };
 
             float[] lbl = new float[]
@@ -173,11 +148,11 @@ namespace DataLabTest
 
             float[] transposed = new float[]
             {
+                0.9f, 3.8f, 2.7f,
+                0.9f, 4.8f, 2.7f,
                 0.9f, 1.8f, 2.7f,
-                0.9f, 1.8f, 2.7f,
-                0.9f, 1.8f, 2.7f,
-                0.9f, 1.8f, 2.7f,
-                0.9f, 1.8f, 2.7f
+                1.9f, 1.8f, 8.7f,
+                0.9f, 1.8f, 6.7f
             };
 
             Tensor t1 = new Tensor(_tc, 3, 5, data);
@@ -441,6 +416,20 @@ namespace DataLabTest
             t2.SynchronizeToLocal();
 
             Assert.Equal(cubecalc.results.Data, t2.Data);
+        }
+
+        [Fact]
+        public void Test_Softmax()
+        {
+            SoftmaxCalculator sc = new SoftmaxCalculator();
+            
+            sc.CalculateResults();
+            Tensor t1 = new Tensor(_tc, 100, 10, 1, 1, sc.values.Data);
+            _tc.SoftMax(t1);
+            t1.SynchronizeToLocal();
+
+            Console.Write("test");
+            Assert.Equal(sc.results.Data, t1.Data);
         }
     }
 }

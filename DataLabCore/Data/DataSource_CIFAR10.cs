@@ -49,7 +49,8 @@ namespace DataLabCore
                 for (int i = 0; i < 10000; i++)
                 {
                     int labelByte = training_data.ReadByte();
-                    byte[] imageBytes = training_data.ReadBytes(_width * _height * _depth);
+                    byte[] imageBytes = training_data.ReadBytes(_sample_size);
+                    //training_data.BaseStream.Seek(imagesize * 2, SeekOrigin.Current);
                     float[] sample = Array.ConvertAll(imageBytes, item => (float)(item / 255f));
                     float[] label = new float[_classes];
                     label[labelByte] = 1.0f;
