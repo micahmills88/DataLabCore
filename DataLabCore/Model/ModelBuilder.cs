@@ -32,14 +32,15 @@ namespace DataLabCore
             _loss_layer = losslayer;
         }
 
-        public void FitModel(IDataSource dataSource, int epochs, float learningRate)
+        public void FitModel(IDataSource dataSource, int epochs, float lossLimit, float learningRate)
         {
             if(_loss_layer == null)
             {
                 throw new Exception("no loss layer");
             }
 
-            for (int e = 0; e < epochs; e++)
+            float lowest_loss = 10f;
+            for (int e = 0; e < epochs || (lowest_loss < lossLimit); e++)
             {
                 
                 stopwatch.Restart();
@@ -70,6 +71,10 @@ namespace DataLabCore
 
                 Console.CursorVisible = true;
                 var loss = _loss_layer.GetEpochLoss();
+                if(loss < lowest_loss)
+                {
+                    lowest_loss = loss;
+                }
                 stopwatch.Stop();
                 Console.SetCursorPosition(0, Console.CursorTop);
                 Console.WriteLine("Epoch: {0:D3} Time: {1} Loss: {2}", e, stopwatch.ElapsedMilliseconds, loss);
