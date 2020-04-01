@@ -12,7 +12,7 @@ namespace DataLabCore
 {
     public class ModelBuilder
     {
-        List<IModelLayer> _layers = new List<IModelLayer>();
+        List<ITrainableLayer> _layers = new List<ITrainableLayer>();
         Stopwatch stopwatch = new Stopwatch();
 
         LossLayer _loss_layer;
@@ -22,7 +22,7 @@ namespace DataLabCore
 
         }
 
-        public void AddLayer(IModelLayer layer)
+        public void AddLayer(ITrainableLayer layer)
         {
             _layers.Add(layer);
         }
@@ -81,6 +81,5 @@ namespace DataLabCore
                 dataSource.Shuffle();
             }
         }
-
     }
 }

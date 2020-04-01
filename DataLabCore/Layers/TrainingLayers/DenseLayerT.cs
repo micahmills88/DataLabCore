@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public class DenseLayer : IModelLayer
+    public class DenseLayerT : ITrainableLayer
     {
         TensorController _controller;
 
@@ -30,7 +30,7 @@ namespace DataLabCore
         Tensor _input_errors;
         Tensor _output_errors;
 
-        public DenseLayer(TensorController controller, int inputs, int outputs, int batchSize, ActivationType activationType)
+        public DenseLayerT(TensorController controller, int inputs, int outputs, int batchSize, ActivationType activationType)
         {
             _controller = controller;
 

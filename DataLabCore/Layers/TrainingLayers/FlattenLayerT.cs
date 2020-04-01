@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public class FlattenLayer : IModelLayer
+    public class FlattenLayerT : ITrainableLayer
     {
         TensorController _controller;
         int _input_rows;
@@ -18,7 +18,7 @@ namespace DataLabCore
         Tensor _forward;
         Tensor _backward;
 
-        public FlattenLayer(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize)
+        public FlattenLayerT(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize)
         {
             _controller = tc;
 

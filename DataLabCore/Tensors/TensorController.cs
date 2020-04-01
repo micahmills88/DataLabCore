@@ -120,8 +120,8 @@ namespace DataLabCore
 
         public void ConvolutionInputError(Tensor inputErrors, Tensor paddedErrors, Tensor outputErrors, Tensor invertedFilters, Tensor filters)
         {
-            var xpad = (paddedErrors.Columns - outputErrors.Columns) / 2;
-            var ypad = (paddedErrors.Rows - outputErrors.Rows) / 2;
+            int xpad = (paddedErrors.Columns - outputErrors.Columns) / 2;
+            int ypad = (paddedErrors.Rows - outputErrors.Rows) / 2;
             int totalRows = outputErrors.Rows * outputErrors.Layers * outputErrors.Cubes;
             _kernels.Pad(totalRows, paddedErrors.DataView, outputErrors.DataView, outputErrors.Columns, outputErrors.Rows, xpad, ypad);
             int totalFilterLayers = filters.Layers * filters.Cubes;

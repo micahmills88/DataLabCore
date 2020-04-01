@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public interface IModelLayer
+    public interface ITrainableLayer
     {
         Tensor Forward(Tensor data);
         Tensor Backward(Tensor error, float learningRate, bool calculateInputErrors);

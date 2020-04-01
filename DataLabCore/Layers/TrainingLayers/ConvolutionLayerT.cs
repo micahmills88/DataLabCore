@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public class ConvolutionLayer : IModelLayer
+    public class ConvolutionLayerT : ITrainableLayer
     {
         TensorController _controller;
 
@@ -43,7 +43,7 @@ namespace DataLabCore
         Tensor _padded_errors;
         Tensor _inverted_filters;
 
-        public ConvolutionLayer(
+        public ConvolutionLayerT(
             TensorController controller, 
             int inputHeight, int inputWidth, int inputDepth, 
             int filterHeight, int filterWidth, int filterCount, 
@@ -88,7 +88,7 @@ namespace DataLabCore
                 padded_height = _output_height + (ypad * 2);
             }
             var padded_size = padded_height * padded_width * _output_depth * batchSize;
-            _padded_errors = new Tensor(_controller, padded_width, padded_height, _output_depth, batchSize, new float[padded_size]);
+            _padded_errors = new Tensor(_controller, padded_height, padded_width, _output_depth, batchSize, new float[padded_size]);
 
             //he_normal for relu
             float weight_range = (float)Math.Sqrt(2.0d / (float)(filterHeight * filterWidth * _filter_depth));
