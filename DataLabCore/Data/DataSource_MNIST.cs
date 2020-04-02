@@ -16,10 +16,11 @@ namespace DataLabCore
         int _samplecount = 60000;
         int _batchsize = 10;
 
-        public int OutHeight { get => _height; }
-        public int OutWidth { get => _width; }
-        public int OutDepth { get => _depth; }
-        public int Samples { get => _samplecount; }
+        public int SampleHeight { get => _height; }
+        public int SampleWidth { get => _width; }
+        public int SampleDepth { get => _depth; }
+        public int SampleSize { get => _sample_size; }
+        public int SampleCount { get => _samplecount; }
 
         string samplePath = @"F:\Machine_Learning\Datasets\MNIST\train-images.idx3-ubyte";
         string labelPath = @"F:\Machine_Learning\Datasets\MNIST\train-labels.idx1-ubyte";
@@ -31,10 +32,8 @@ namespace DataLabCore
         List<Tensor> sample_tensors = new List<Tensor>();
         List<Tensor> label_tensors = new List<Tensor>();
 
-        public DataSource_MNIST(TensorController controller, int batchSize)
+        public DataSource_MNIST()
         {
-            _controller = controller;
-            _batchsize = batchSize;
             BinaryReader training_images = new BinaryReader(new FileStream(samplePath, FileMode.Open));
             BinaryReader training_labels = new BinaryReader(new FileStream(labelPath, FileMode.Open));
 
@@ -55,9 +54,15 @@ namespace DataLabCore
                 data_samples.Add(guid, sample);
             }
 
+            Console.WriteLine("Loading done...");
+        }
+
+        public void Initialize(TensorController tc, int batchSize)
+        {
+            _controller = tc;
+            _batchsize = batchSize;
             BuildTensors();
             SetTensorData();
-            Console.WriteLine("Loading done...");
         }
 
         public Tensor GetSampleBatch(int batchnum)

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public class ConvolutionLayerT : ITrainableLayer
+    public class ConvolutionLayerTrainer : ITrainableLayer
     {
         TensorController _controller;
 
@@ -43,7 +43,7 @@ namespace DataLabCore
         Tensor _padded_errors;
         Tensor _inverted_filters;
 
-        public ConvolutionLayerT(
+        public ConvolutionLayerTrainer(
             TensorController controller, 
             int inputHeight, int inputWidth, int inputDepth, 
             int filterHeight, int filterWidth, int filterCount, 

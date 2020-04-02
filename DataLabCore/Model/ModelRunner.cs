@@ -5,11 +5,11 @@ using System.Text;
 namespace DataLabCore
 {
 
-    public class NetworkModel
+    public class ModelRunner
     {
         List<IProductionLayer> layers = new List<IProductionLayer>();
 
-        public NetworkModel()
+        public ModelRunner()
         {
 
         }

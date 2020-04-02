@@ -4,22 +4,8 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public interface ITrainableLayer
+    public interface ITrainableLayer : IProductionLayer
     {
-        Tensor Forward(Tensor data);
         Tensor Backward(Tensor error, float learningRate, bool calculateInputErrors);
-    }
-
-    public enum ActivationType
-    {
-        Sigmoid,
-        Softmax,
-        ReLU
-    }
-
-    public enum PaddingType
-    {
-        None,
-        Same
     }
 }

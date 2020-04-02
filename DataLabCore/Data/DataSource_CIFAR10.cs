@@ -16,10 +16,11 @@ namespace DataLabCore
         int _samplecount = 50000;
         int _batchsize = 10;
 
-        public int OutHeight { get => _height; }
-        public int OutWidth { get => _width; }
-        public int OutDepth { get => _depth; }
-        public int Samples { get => _samplecount; }
+        public int SampleHeight { get => _height; }
+        public int SampleWidth { get => _width; }
+        public int SampleDepth { get => _depth; }
+        public int SampleSize { get => _sample_size; }
+        public int SampleCount { get => _samplecount; }
 
         public int TotalBatches { get { return _samplecount / _batchsize; } }
 
@@ -38,10 +39,9 @@ namespace DataLabCore
         List<Tensor> sample_tensors = new List<Tensor>();
         List<Tensor> label_tensors = new List<Tensor>();
 
-        public DataSource_CIFAR10(TensorController controller, int batchSize)
+        public DataSource_CIFAR10()
         {
-            _controller = controller;
-            _batchsize = batchSize;
+
             foreach(var samplePath in samplePaths)
             {
                 BinaryReader training_data = new BinaryReader(new FileStream(samplePath, FileMode.Open));
@@ -61,9 +61,15 @@ namespace DataLabCore
                 }
             }
 
+            Console.WriteLine("Data Loaded...");
+        }
+
+        public void Initialize(TensorController controller, int batchSize)
+        {
+            _controller = controller;
+            _batchsize = batchSize;
             BuildTensors();
             SetTensorData();
-            Console.WriteLine("Data Loaded...");
         }
 
         public Tensor GetSampleBatch(int batchnum)

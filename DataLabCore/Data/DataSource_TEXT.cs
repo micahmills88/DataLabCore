@@ -21,10 +21,11 @@ namespace DataLabCore
         List<char> _raw_data = new List<char>();
         List<char> _unique_chars = new List<char>();
 
-        public int OutHeight { get => _height; }
-        public int OutWidth { get => _width; }
-        public int OutDepth { get => _depth; }
-        public int Samples { get => _samplecount; }
+        public int SampleHeight { get => _height; }
+        public int SampleWidth { get => _width; }
+        public int SampleDepth { get => _depth; }
+        public int SampleSize { get => _sample_size; }
+        public int SampleCount { get => _samplecount; }
 
         //string samplePath = @"F:\Machine_Learning\Datasets\shakespear\shakespear_long_cleaned.txt";
         string samplePath = @"F:\Machine_Learning\Datasets\shakespear\shakespear_short_cleaned.txt";
@@ -36,12 +37,10 @@ namespace DataLabCore
         List<Tensor> sample_tensors = new List<Tensor>();
         List<Tensor> label_tensors = new List<Tensor>();
 
-        public DataSource_TEXT(TensorController tc, int sampleCount, int batchSize, int samplesPerEpoch)
+        public DataSource_TEXT(int charsPerSample, int samplesPerEpoch)
         {
             Console.WriteLine("Loading text from: {0}", samplePath);
-            _controller = tc;
-            _batchsize = batchSize;
-            _height = sampleCount;
+            _height = charsPerSample;
 
             string fullText = File.ReadAllText(samplePath);
             _raw_data.AddRange(fullText.ToCharArray());
@@ -49,7 +48,7 @@ namespace DataLabCore
             _width = _unique_chars.Count;
             _classes = _width;
             _sample_size = _width * _height;
-            _real_samplecount = _raw_data.Count - sampleCount;
+            _real_samplecount = _raw_data.Count - charsPerSample;
             _samplecount = _real_samplecount;
             if (samplesPerEpoch <= _real_samplecount)
             {
@@ -66,10 +65,15 @@ namespace DataLabCore
                 data_labels.Add(g, label);
             }
 
+            Console.WriteLine("Data Loaded...");
+        }
+
+        public void Initialize(TensorController tc, int batchSize)
+        {
+            _controller = tc;
+            _batchsize = batchSize;
             BuildTensors();
             SetTensorData();
-
-            Console.WriteLine("Data Loaded...");
         }
 
         public Tensor GetSampleBatch(int batchnum)

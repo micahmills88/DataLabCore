@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public class MaxPoolLayerT : ITrainableLayer
+    public class MaxPoolLayerTrainer : ITrainableLayer
     {
         TensorController _controller;
 
@@ -25,7 +25,7 @@ namespace DataLabCore
         Tensor _outputs;
         Tensor _mask;
 
-        public MaxPoolLayerT(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize)
+        public MaxPoolLayerTrainer(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize)
         {
             _controller = tc;
 
