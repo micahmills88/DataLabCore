@@ -7,6 +7,7 @@ namespace DataLabCore
     public class ConvolutionLayerTrainer : ITrainableLayer
     {
         TensorController _controller;
+        LayerDescription _description;
 
         int _filter_height;
         int _filter_width;
@@ -17,9 +18,10 @@ namespace DataLabCore
         int _output_width;
         int _output_depth;
 
-        public int OutHeight { get => _output_height;}
-        public int OutWidth { get => _output_width; }
-        public int OutDepth { get => _output_depth; }
+        public int OutputHeight { get => _output_height;}
+        public int OutputWidth { get => _output_width; }
+        public int OutputDepth { get => _output_depth; }
+        public int OutputSize { get => _output_height * _output_width * _output_depth; }
 
         int _batch_size;
         ActivationType _activation;
@@ -43,28 +45,23 @@ namespace DataLabCore
         Tensor _padded_errors;
         Tensor _inverted_filters;
 
-        public ConvolutionLayerTrainer(
-            TensorController controller, 
-            int inputHeight, int inputWidth, int inputDepth, 
-            int filterHeight, int filterWidth, int filterCount, 
-            int batchSize, 
-            ActivationType layerActivation,
-            PaddingType paddingType = PaddingType.None
-            )
+        public ConvolutionLayerTrainer(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize, LayerDescription layerDescription)
         {
-            _controller = controller;
-            _filter_height = filterHeight;
-            _filter_width = filterWidth;
+            _controller = tc;
+            _description = layerDescription;
+
+            _filter_height = layerDescription.WeightRows;
+            _filter_width = layerDescription.WeightColumns;
             _filter_depth = inputDepth;
-            _filter_count = filterCount;
+            _filter_count = layerDescription.WeightCubes;
             _batch_size = batchSize;
-            _activation = layerActivation;
-            _padding = paddingType;
-            _output_depth = filterCount;
+            _activation = layerDescription.activationType;
+            _padding = layerDescription.paddingType;
 
+            _output_depth = _filter_count;
 
-            var xpad = filterWidth - 1;
-            var ypad = filterHeight - 1;
+            var xpad = _filter_width - 1;
+            var ypad = _filter_height - 1;
             var padded_width = 0;
             var padded_height = 0;
             if (_padding == PaddingType.Same)
@@ -91,19 +88,18 @@ namespace DataLabCore
             _padded_errors = new Tensor(_controller, padded_height, padded_width, _output_depth, batchSize, new float[padded_size]);
 
             //he_normal for relu
-            float weight_range = (float)Math.Sqrt(2.0d / (float)(filterHeight * filterWidth * _filter_depth));
-            //float weight_range = (float)Math.Sqrt(2.0d / (float)(inputHeight * inputWidth * _filter_depth));
+            float weight_range = (float)Math.Sqrt(2.0d / (float)(_filter_height * _filter_width * _filter_depth));
 
             int filterSize = _filter_height * _filter_width * _filter_depth * _filter_count;
-            var weight_data = RandomGenerator.GetFloatNormalDistribution(filterSize, 0f, weight_range);
-            _filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, weight_data);
+            _description.Weights = RandomGenerator.GetFloatNormalDistribution(filterSize, 0f, weight_range);
+            _filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, _description.Weights);
             _momentum_filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
             _filter_weights_errors = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
             _inverted_filters = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
 
             int biasSize = _output_height * _output_width * _output_depth;
-            float[] filter_bias = new float[biasSize]; // RandomGenerator.GetFloatUniformDistribution(biasSize, -weight_range, weight_range);
-            _filter_bias = new Tensor(_controller, _output_height, _output_width, _output_depth, filter_bias);
+            _description.Bias = new float[biasSize];
+            _filter_bias = new Tensor(_controller, _output_height, _output_width, _output_depth, _description.Bias);
             _filter_bias_errors = new Tensor(_controller, _output_height, _output_width, _output_depth, new float[biasSize]);
             _momentum_filter_bias = new Tensor(_controller, _output_height, _output_width, _output_depth, new float[biasSize]);
 
@@ -142,6 +138,28 @@ namespace DataLabCore
             _controller.ConvolutionLayerWeightUpdate(_filter_weights, _filter_weights_errors, _momentum_filter_weights, _inputs, _output_errors, batchMultiple, learningRate);
             _controller.ConvolutionLayerBiasUpdate(_filter_bias, _filter_bias_errors, _momentum_filter_bias, _output_errors, batchMultiple, learningRate);
             return _input_errors;
+        }
+
+        public LayerDescription ExportLayerDescription()
+        {
+            _description.layerType = LayerType.Convolution;
+            _description.HasWeights = true;
+            _description.WeightRows = _filter_weights.Rows;
+            _description.WeightColumns = _filter_weights.Columns;
+            _description.WeightLayers = _filter_weights.Layers;
+            _description.WeightCubes = _filter_weights.Cubes;
+            _description.HasBias = true;
+            _description.BiasRows = _filter_bias.Rows;
+            _description.BiasColumns = _filter_bias.Columns;
+            _description.BiasLayers = _filter_bias.Layers;
+            _description.BiasCubes = _filter_bias.Cubes;
+            _description.activationType = _activation;
+            _description.paddingType = _padding;
+
+            _filter_weights.SynchronizeToLocal();
+            _filter_bias.SynchronizeToLocal();
+
+            return _description;
         }
     }
 }

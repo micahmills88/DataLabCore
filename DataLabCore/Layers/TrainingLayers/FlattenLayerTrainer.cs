@@ -7,20 +7,26 @@ namespace DataLabCore
     public class FlattenLayerTrainer : ITrainableLayer
     {
         TensorController _controller;
+        LayerDescription _description;
+
         int _input_rows;
         int _input_columns;
         int _input_layers;
         int _input_cubes;
         int _output_size;
 
-        public int OutSize { get => _output_size; }
+        public int OutputHeight { get => _input_cubes; }
+        public int OutputWidth { get => _output_size; }
+        public int OutputDepth { get => 1; }
+        public int OutputSize { get => _output_size; }
 
         Tensor _forward;
         Tensor _backward;
 
-        public FlattenLayerTrainer(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize)
+        public FlattenLayerTrainer(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize, LayerDescription layerDescription)
         {
             _controller = tc;
+            _description = layerDescription;
 
             _input_rows = inputHeight;
             _input_columns = inputWidth;
@@ -45,6 +51,11 @@ namespace DataLabCore
             //_backward.CopyDataFrom(data);
             _controller.Transpose2D(_backward, data, false);
             return _backward;
+        }
+
+        public LayerDescription ExportLayerDescription()
+        {
+            return _description;
         }
     }
 }

@@ -42,10 +42,15 @@ namespace DataLabCore
                 HasWeights = true,
                 WeightRows = filterHeight,
                 WeightColumns = filterWidth,
+                //WeightLayers
                 WeightCubes = filterCount,
+                //Weights
                 HasBias = true,
+                //BiasRows
+                //BiasColumns
                 BiasLayers = filterCount,
                 BiasCubes = 1,
+                //Bias
                 activationType = activation,
                 paddingType = padding
             };
@@ -99,30 +104,69 @@ namespace DataLabCore
         public void Initialize(int batchSize)
         {
             _data_source.Initialize(_controller, batchSize);
+            int inputHeight = _data_source.SampleHeight;
+            int inputWidth = _data_source.SampleWidth;
+            int inputDepth = _data_source.SampleDepth;
+            int inputSize = _data_source.SampleSize;
+
             for (int i = 0; i < _keys.Count; i++)
             {
-                //initialize each layertrainer
+                var key = _keys[i];
+                var desc = _descriptions[key];
+                ITrainableLayer layer = null;
+                switch (desc.layerType)
+                {
+                    case LayerType.Convolution:
+                        layer = new ConvolutionLayerTrainer(_controller, inputHeight, inputWidth, inputDepth, batchSize, desc);
+                        break;
+                    case LayerType.Dense:
+                        layer = new DenseLayerTrainer(_controller, inputSize, batchSize, desc);
+                        break;
+                    case LayerType.Flatten:
+                        layer = new FlattenLayerTrainer(_controller, inputHeight, inputWidth, inputDepth, batchSize, desc);
+                        break;
+                    case LayerType.MaxPool:
+                        layer = new MaxPoolLayerTrainer(_controller, inputHeight, inputWidth, inputDepth, batchSize, desc);
+                        break;
+                }
+                _layers.Add(key, layer);
+                inputHeight = layer.OutputHeight;
+                inputWidth = layer.OutputWidth;
+                inputDepth = layer.OutputDepth;
+                inputSize = layer.OutputSize;
             }
 
-            //var lastLayer = get last
-            _loss_layer = new LossLayer(_controller, 0, batchSize, _data_source.SampleCount)
+            var lastLayer = _layers[_keys[_keys.Count - 1]];
+            _loss_layer = new LossLayer(_controller, lastLayer.OutputSize, batchSize, _data_source.SampleCount);
         }
 
-        public void TrainModel(float learningRate, LossFunction lossFunction)
+        public void TrainModel(float learningRate, LossFunction lossFunction, int epochs, float stopLoss)
         {
             var _reverse_keys = _keys.ToList();
             _reverse_keys.Reverse();
 
-            var data = _data_source.GetSampleBatch(0);
-            var labels = _data_source.GetLabelBatch(0);
-            for (int i = 0; i < _keys.Count; i++)
+            int batchcount = _data_source.GetTotalBatches();
+            for (int e = 0; e < epochs; e++)
             {
-                data = _layers[_keys[i]].Forward(data);
-            }
-            var error = _loss_layer.CalculateLoss(data, labels, lossFunction);
-            for (int i = 0; i < _reverse_keys.Count; i++)
-            {
-                error = _layers[_reverse_keys[i]].Backward(error, learningRate, i < _reverse_keys.Count - 1);
+                for (int b = 0; b < batchcount; b++)
+                {
+                    var data = _data_source.GetSampleBatch(b);
+                    var labels = _data_source.GetLabelBatch(b);
+                    for (int i = 0; i < _keys.Count; i++)
+                    {
+                        data = _layers[_keys[i]].Forward(data);
+                    }
+                    var error = _loss_layer.CalculateLoss(data, labels, lossFunction);
+                    for (int i = 0; i < _reverse_keys.Count; i++)
+                    {
+                        error = _layers[_reverse_keys[i]].Backward(error, learningRate, i < _reverse_keys.Count - 1);
+                    }
+                }
+
+                var epochLoss = _loss_layer.GetEpochLoss();
+                Console.WriteLine("Epoch {0:D4} Loss {1:N5}", e, epochLoss);
+
+                _data_source.Shuffle();
             }
         }
     }

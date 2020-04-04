@@ -7,6 +7,7 @@ namespace DataLabCore
     public class MaxPoolLayerTrainer : ITrainableLayer
     {
         TensorController _controller;
+        LayerDescription _description;
 
         int _input_height;
         int _input_width;
@@ -17,23 +18,27 @@ namespace DataLabCore
         int _output_width;
         int _output_depth;
 
-        public int OutHeight { get => _output_height; }
-        public int OutWidth { get => _output_width; }
-        public int OutDepth { get => _output_depth; }
+        public int OutputHeight { get => _output_height; }
+        public int OutputWidth { get => _output_width; }
+        public int OutputDepth { get => _output_depth; }
+        public int OutputSize { get => _output_height * _output_width * _output_depth; }
 
         Tensor _input_errors;
         Tensor _outputs;
         Tensor _mask;
 
-        public MaxPoolLayerTrainer(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize)
+        public MaxPoolLayerTrainer(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize, LayerDescription layerDescription)
         {
             _controller = tc;
+            _description = layerDescription;
 
             _input_height = inputHeight;
             _input_width = inputWidth;
             _input_depth = inputDepth;
             _batch_size = batchSize;
 
+            //TODO this layer will break if the input dimensions are odd
+            //need to add padding functionality for odd layers
             _output_height = _input_height / 2;
             _output_width = _input_width / 2;
             _output_depth = _input_depth;
@@ -59,6 +64,11 @@ namespace DataLabCore
         {
             _controller.MaxPoolBackward(_input_errors, _mask, error);
             return _input_errors;
+        }
+
+        public LayerDescription ExportLayerDescription()
+        {
+            return _description;
         }
     }
 }

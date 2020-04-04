@@ -7,13 +7,17 @@ namespace DataLabCore
     public class DenseLayerTrainer : ITrainableLayer
     {
         TensorController _controller;
+        LayerDescription _description;
 
         int _input_count;
         int _output_count;
         int _batch_size;
         ActivationType _activation;
 
-        public int OutSize { get => _output_count; }
+        public int OutputHeight { get => _batch_size; }
+        public int OutputWidth { get => _output_count; }
+        public int OutputDepth { get => 1; }
+        public int OutputSize { get => _output_count; }
 
         Tensor _weights;
         Tensor _bias;
@@ -30,17 +34,18 @@ namespace DataLabCore
         Tensor _input_errors;
         Tensor _output_errors;
 
-        public DenseLayerTrainer(TensorController controller, int inputs, int outputs, int batchSize, ActivationType activationType)
+        public DenseLayerTrainer(TensorController controller, int inputs, int batchSize, LayerDescription layerDescription)
         {
             _controller = controller;
+            _description = layerDescription;
 
             _input_count = inputs;
-            _output_count = outputs;
+            _output_count = layerDescription.WeightColumns;
             _batch_size = batchSize;
-            _activation = activationType;
+            _activation = layerDescription.activationType;
 
             //default is glorot (sigmoid)
-            bool isRelu = activationType == ActivationType.ReLU;
+            bool isRelu = _activation == ActivationType.ReLU;
 
             var weight_count = _input_count * _output_count;
             float[] weight_data;
@@ -49,7 +54,7 @@ namespace DataLabCore
             {
                 float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
                 weight_data = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
-                bias_data = new float[_output_count];//RandomGenerator.GetFloatUniformDistribution(_output_count, -weight_range, weight_range);
+                bias_data = new float[_output_count];
             }
             else
             {
@@ -97,6 +102,28 @@ namespace DataLabCore
             //we need to reset _output_errors dimensions before the next loop
             _output_errors.Transpose2DValues();
             return _input_errors;
+        }
+
+        public LayerDescription ExportLayerDescription()
+        {
+            _description.layerType = LayerType.Convolution;
+            _description.HasWeights = true;
+            _description.WeightRows = _weights.Rows;
+            _description.WeightColumns = _weights.Columns;
+            _description.WeightLayers = _weights.Layers;
+            _description.WeightCubes = _weights.Cubes;
+            _description.HasBias = true;
+            _description.BiasRows = _bias.Rows;
+            _description.BiasColumns = _bias.Columns;
+            _description.BiasLayers = _bias.Layers;
+            _description.BiasCubes = _bias.Cubes;
+            _description.activationType = _activation;
+            _description.paddingType = PaddingType.None;
+
+            _weights.SynchronizeToLocal();
+            _bias.SynchronizeToLocal();
+
+            return _description;
         }
     }
 }

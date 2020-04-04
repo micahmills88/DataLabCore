@@ -6,20 +6,21 @@ namespace DataLabCore
 {
     public enum ActivationType
     {
-        Sigmoid,
-        Softmax,
-        ReLU,
-        None
+        Sigmoid = 4001,
+        Softmax = 4002,
+        ReLU = 4003,
+        None = 4000
     }
 
     public enum PaddingType
     {
-        None,
-        Same
+        None = 1000,
+        Same = 1001
     }
 
     public enum LayerType
     {
+        None = 0,
         Convolution = 1,
         Dense = 2,
         Flatten = 3,

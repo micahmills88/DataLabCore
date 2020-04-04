@@ -27,6 +27,8 @@ namespace DataLabCore
         public int SampleSize { get => _sample_size; }
         public int SampleCount { get => _samplecount; }
 
+        public int Classes { get => _classes; }
+
         //string samplePath = @"F:\Machine_Learning\Datasets\shakespear\shakespear_long_cleaned.txt";
         string samplePath = @"F:\Machine_Learning\Datasets\shakespear\shakespear_short_cleaned.txt";
 

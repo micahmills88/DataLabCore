@@ -17,9 +17,10 @@ namespace DataLabCore
         int _output_width;
         int _output_depth;
 
-        public int OutHeight { get => _output_height; }
-        public int OutWidth { get => _output_width; }
-        public int OutDepth { get => _output_depth; }
+        public int OutputHeight { get => _output_height; }
+        public int OutputWidth { get => _output_width; }
+        public int OutputDepth { get => _output_depth; }
+        public int OutputSize { get => _output_height * _output_width * _output_depth; }
 
         int _batch_size;
         ActivationType _activation;
@@ -86,5 +87,7 @@ namespace DataLabCore
             _controller.ConvolutionForward(_outputs, _inputs, _filter_weights, _filter_bias, _activation);
             return _outputs;
         }
+
+
     }
 }
