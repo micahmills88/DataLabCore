@@ -16,6 +16,7 @@ namespace DataLabCore
         IDataSource _data_source;
         LossLayer _loss_layer;
 
+        Stopwatch stopwatch;
 
         List<string> _keys = new List<string>();
         Dictionary<string, LayerDescription> _descriptions = new Dictionary<string, LayerDescription>();
@@ -145,6 +146,7 @@ namespace DataLabCore
             var _reverse_keys = _keys.ToList();
             _reverse_keys.Reverse();
 
+            stopwatch = Stopwatch.StartNew();
             int batchcount = _data_source.GetTotalBatches();
             for (int e = 0; e < epochs; e++)
             {
@@ -163,8 +165,9 @@ namespace DataLabCore
                     }
                 }
 
+                stopwatch.Stop();
                 var epochLoss = _loss_layer.GetEpochLoss();
-                Console.WriteLine("Epoch {0:D4} Loss {1:N5}", e, epochLoss);
+                Console.WriteLine("Epoch {0:D4} Time {1} Loss {2:N5}", e, stopwatch.ElapsedMilliseconds, epochLoss);
 
                 _data_source.Shuffle();
             }

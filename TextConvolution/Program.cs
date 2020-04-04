@@ -18,7 +18,7 @@ namespace TextConvolution
             trainer.AddDenselayer(datasource.Classes, ActivationType.Softmax);
 
             trainer.Initialize(50);
-            trainer.TrainModel(0.01f, LossFunction.Multiclass, 1000, 0.01f);
+            trainer.TrainModel(0.001f, LossFunction.Multiclass, 1000, 0.01f);
 
             Console.WriteLine("Done");
             Console.ReadLine();
