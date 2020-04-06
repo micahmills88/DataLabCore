@@ -48,27 +48,25 @@ namespace DataLabCore
             bool isRelu = _activation == ActivationType.ReLU;
 
             var weight_count = _input_count * _output_count;
-            float[] weight_data;
-            float[] bias_data;
             if(isRelu)
             {
                 float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
-                weight_data = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
-                bias_data = new float[_output_count];
+                _description.Weights = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
+                _description.Bias = new float[_output_count];
             }
             else
             {
                 float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
-                weight_data = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
-                bias_data = RandomGenerator.GetFloatNormalDistribution(_output_count, 0f, weight_range);
+                _description.Weights = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
+                _description.Bias = RandomGenerator.GetFloatNormalDistribution(_output_count, 0f, weight_range);
             }
 
 
-            _weights = new Tensor(_controller, _input_count, _output_count, weight_data);
+            _weights = new Tensor(_controller, _input_count, _output_count, _description.Weights);
             _momentum_weights = new Tensor(_controller, _input_count, _output_count, new float[weight_count]);
             _weights_errors = new Tensor(_controller, _input_count, _output_count, new float[weight_count]);
 
-            _bias = new Tensor(_controller, bias_data);
+            _bias = new Tensor(_controller, _description.Bias);
             _momentum_bias = new Tensor(_controller, new float[_output_count]);
             _bias_errors = new Tensor(_controller, new float[_output_count]);
 
@@ -106,7 +104,7 @@ namespace DataLabCore
 
         public LayerDescription ExportLayerDescription()
         {
-            _description.layerType = LayerType.Convolution;
+            _description.layerType = LayerType.Dense;
             _description.HasWeights = true;
             _description.WeightRows = _weights.Rows;
             _description.WeightColumns = _weights.Columns;
