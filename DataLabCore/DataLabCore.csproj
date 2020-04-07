@@ -16,6 +16,10 @@
   <ItemGroup>
     <PackageReference Include="ILGPU" Version="0.7.1" />
     <PackageReference Include="ILGPU.Algorithms" Version="0.7.0" />
+    <PackageReference Include="MongoDB.Bson" Version="2.10.2" />
+    <PackageReference Include="MongoDB.Driver" Version="2.10.2" />
+    <PackageReference Include="MongoDB.Driver.Core" Version="2.10.2" />
+    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.10.2" />
   </ItemGroup>
 
 </Project>

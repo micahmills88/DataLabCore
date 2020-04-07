@@ -7,6 +7,6 @@ namespace DataLabCore
     public interface ITrainableLayer : IProductionLayer
     {
         Tensor Backward(Tensor error, float learningRate, bool calculateInputErrors);
-        LayerDescription ExportLayerDescription();
+        LayerConfig ExportLayer();
     }
 }

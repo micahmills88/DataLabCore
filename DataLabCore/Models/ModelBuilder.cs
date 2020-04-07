@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace DataLabCore
 {
-    public class ModelTrainer
+    public class ModelBuilder
     {
         TensorController _controller;
         IDataSource _data_source;
@@ -19,16 +19,19 @@ namespace DataLabCore
         Stopwatch stopwatch;
 
         List<string> _keys = new List<string>();
-        Dictionary<string, LayerDescription> _descriptions = new Dictionary<string, LayerDescription>();
+        Dictionary<string, LayerConfig> _descriptions = new Dictionary<string, LayerConfig>();
         Dictionary<string, ITrainableLayer> _layers = new Dictionary<string, ITrainableLayer>();
 
-        public ModelTrainer(IDataSource dataSource, ControllerType controllerType)
+        string _model_name = "";
+
+        public ModelBuilder(string modelName, IDataSource dataSource, ControllerType controllerType)
         {
+            _model_name = modelName;
             _data_source = dataSource;
             _controller = new TensorController(controllerType);
         }
 
-        public void AddLayer(LayerDescription layerDescription)
+        public void AddLayer(LayerConfig layerDescription)
         {
             _keys.Add(layerDescription.Key);
             _descriptions.Add(layerDescription.Key, layerDescription);
@@ -37,7 +40,7 @@ namespace DataLabCore
         public void AddConvolutionLayer(int filterHeight, int filterWidth, int filterCount, 
             ActivationType activation = ActivationType.ReLU, PaddingType padding = PaddingType.None)
         {
-            var desc = new LayerDescription()
+            var desc = new LayerConfig()
             {
                 layerType = LayerType.Convolution,
                 HasWeights = true,
@@ -61,7 +64,7 @@ namespace DataLabCore
 
         public void AddMaxPoolLayer() //todo add kernel size settings
         {
-            var desc = new LayerDescription()
+            var desc = new LayerConfig()
             {
                 layerType = LayerType.MaxPool,
                 HasWeights = true,
@@ -74,7 +77,7 @@ namespace DataLabCore
 
         public void AddFlattenLayer()
         {
-            var desc = new LayerDescription()
+            var desc = new LayerConfig()
             {
                 layerType = LayerType.Flatten,
             };
@@ -84,7 +87,7 @@ namespace DataLabCore
 
         public void AddDenselayer(int outputCount, ActivationType activation = ActivationType.Sigmoid)
         {
-            var desc = new LayerDescription()
+            var desc = new LayerConfig()
             {
                 layerType = LayerType.Dense,
                 HasWeights = true,
@@ -118,16 +121,16 @@ namespace DataLabCore
                 switch (desc.layerType)
                 {
                     case LayerType.Convolution:
-                        layer = new ConvolutionLayerTrainer(_controller, inputHeight, inputWidth, inputDepth, batchSize, desc);
+                        layer = new ConvolutionLayerBuilder(_controller, inputHeight, inputWidth, inputDepth, batchSize, desc);
                         break;
                     case LayerType.Dense:
-                        layer = new DenseLayerTrainer(_controller, inputSize, batchSize, desc);
+                        layer = new DenseLayerBuilder(_controller, inputSize, batchSize, desc);
                         break;
                     case LayerType.Flatten:
-                        layer = new FlattenLayerTrainer(_controller, inputHeight, inputWidth, inputDepth, batchSize, desc);
+                        layer = new FlattenLayerBuilder(_controller, inputHeight, inputWidth, inputDepth, batchSize, desc);
                         break;
                     case LayerType.MaxPool:
-                        layer = new MaxPoolLayerTrainer(_controller, inputHeight, inputWidth, inputDepth, batchSize, desc);
+                        layer = new MaxPoolLayerBuilder(_controller, inputHeight, inputWidth, inputDepth, batchSize, desc);
                         break;
                 }
                 _layers.Add(key, layer);
@@ -171,6 +174,22 @@ namespace DataLabCore
 
                 _data_source.Shuffle();
             }
+        }
+
+        public ModelConfig ExportModel()
+        {
+            ModelConfig model = new ModelConfig();
+            model.ModelName = _model_name;
+            model.LayerConfigs = new List<LayerConfig>();
+            foreach(var key in _keys)
+            {
+                var layer = _layers[key];
+                model.LayerConfigs.Add(layer.ExportLayer());
+            }
+            model.InputRows = _data_source.SampleHeight;
+            model.InputColumns = _data_source.SampleWidth;
+            model.InputLayers = _data_source.SampleDepth;
+            return model;
         }
     }
 }

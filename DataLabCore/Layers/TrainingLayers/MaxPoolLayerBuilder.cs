@@ -4,10 +4,10 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public class MaxPoolLayerTrainer : ITrainableLayer
+    public class MaxPoolLayerBuilder : ITrainableLayer
     {
         TensorController _controller;
-        LayerDescription _description;
+        LayerConfig _config;
 
         int _input_height;
         int _input_width;
@@ -27,10 +27,10 @@ namespace DataLabCore
         Tensor _outputs;
         Tensor _mask;
 
-        public MaxPoolLayerTrainer(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize, LayerDescription layerDescription)
+        public MaxPoolLayerBuilder(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize, LayerConfig layerConfig)
         {
             _controller = tc;
-            _description = layerDescription;
+            _config = layerConfig;
 
             _input_height = inputHeight;
             _input_width = inputWidth;
@@ -66,9 +66,9 @@ namespace DataLabCore
             return _input_errors;
         }
 
-        public LayerDescription ExportLayerDescription()
+        public LayerConfig ExportLayer()
         {
-            return _description;
+            return _config;
         }
     }
 }

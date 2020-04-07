@@ -6,28 +6,28 @@ namespace DataLabCore
 {
     public enum ActivationType
     {
-        Sigmoid = 4001,
-        Softmax = 4002,
-        ReLU = 4003,
-        None = 4000
+        None = 3000,
+        Sigmoid = 3001,
+        Softmax = 3002,
+        ReLU = 3003        
     }
 
     public enum PaddingType
     {
-        None = 1000,
-        Same = 1001
+        None = 2000,
+        Same = 2001
     }
 
     public enum LayerType
     {
-        None = 0,
-        Convolution = 1,
-        Dense = 2,
-        Flatten = 3,
-        MaxPool = 4
+        None = 1000,
+        Convolution = 1001,
+        Dense = 1002,
+        Flatten = 1003,
+        MaxPool = 1004
     }
 
-    public class LayerDescription
+    public class LayerConfig
     {
         public LayerType layerType;
         public bool HasWeights = false;

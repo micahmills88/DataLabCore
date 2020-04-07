@@ -4,10 +4,10 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public class DenseLayerTrainer : ITrainableLayer
+    public class DenseLayerBuilder : ITrainableLayer
     {
         TensorController _controller;
-        LayerDescription _description;
+        LayerConfig _config;
 
         int _input_count;
         int _output_count;
@@ -34,15 +34,15 @@ namespace DataLabCore
         Tensor _input_errors;
         Tensor _output_errors;
 
-        public DenseLayerTrainer(TensorController controller, int inputs, int batchSize, LayerDescription layerDescription)
+        public DenseLayerBuilder(TensorController controller, int inputs, int batchSize, LayerConfig layerConfig)
         {
             _controller = controller;
-            _description = layerDescription;
+            _config = layerConfig;
 
             _input_count = inputs;
-            _output_count = layerDescription.WeightColumns;
+            _output_count = layerConfig.WeightColumns;
             _batch_size = batchSize;
-            _activation = layerDescription.activationType;
+            _activation = layerConfig.activationType;
 
             //default is glorot (sigmoid)
             bool isRelu = _activation == ActivationType.ReLU;
@@ -51,22 +51,22 @@ namespace DataLabCore
             if(isRelu)
             {
                 float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
-                _description.Weights = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
-                _description.Bias = new float[_output_count];
+                _config.Weights = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
+                _config.Bias = new float[_output_count];
             }
             else
             {
                 float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
-                _description.Weights = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
-                _description.Bias = RandomGenerator.GetFloatNormalDistribution(_output_count, 0f, weight_range);
+                _config.Weights = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
+                _config.Bias = RandomGenerator.GetFloatNormalDistribution(_output_count, 0f, weight_range);
             }
 
 
-            _weights = new Tensor(_controller, _input_count, _output_count, _description.Weights);
+            _weights = new Tensor(_controller, _input_count, _output_count, _config.Weights);
             _momentum_weights = new Tensor(_controller, _input_count, _output_count, new float[weight_count]);
             _weights_errors = new Tensor(_controller, _input_count, _output_count, new float[weight_count]);
 
-            _bias = new Tensor(_controller, _description.Bias);
+            _bias = new Tensor(_controller, _config.Bias);
             _momentum_bias = new Tensor(_controller, new float[_output_count]);
             _bias_errors = new Tensor(_controller, new float[_output_count]);
 
@@ -102,26 +102,26 @@ namespace DataLabCore
             return _input_errors;
         }
 
-        public LayerDescription ExportLayerDescription()
+        public LayerConfig ExportLayer()
         {
-            _description.layerType = LayerType.Dense;
-            _description.HasWeights = true;
-            _description.WeightRows = _weights.Rows;
-            _description.WeightColumns = _weights.Columns;
-            _description.WeightLayers = _weights.Layers;
-            _description.WeightCubes = _weights.Cubes;
-            _description.HasBias = true;
-            _description.BiasRows = _bias.Rows;
-            _description.BiasColumns = _bias.Columns;
-            _description.BiasLayers = _bias.Layers;
-            _description.BiasCubes = _bias.Cubes;
-            _description.activationType = _activation;
-            _description.paddingType = PaddingType.None;
+            _config.layerType = LayerType.Dense;
+            _config.HasWeights = true;
+            _config.WeightRows = _weights.Rows;
+            _config.WeightColumns = _weights.Columns;
+            _config.WeightLayers = _weights.Layers;
+            _config.WeightCubes = _weights.Cubes;
+            _config.HasBias = true;
+            _config.BiasRows = _bias.Rows;
+            _config.BiasColumns = _bias.Columns;
+            _config.BiasLayers = _bias.Layers;
+            _config.BiasCubes = _bias.Cubes;
+            _config.activationType = _activation;
+            _config.paddingType = PaddingType.None;
 
             _weights.SynchronizeToLocal();
             _bias.SynchronizeToLocal();
 
-            return _description;
+            return _config;
         }
     }
 }

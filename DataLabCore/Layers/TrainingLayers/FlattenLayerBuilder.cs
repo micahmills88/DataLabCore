@@ -4,10 +4,10 @@ using System.Text;
 
 namespace DataLabCore
 {
-    public class FlattenLayerTrainer : ITrainableLayer
+    public class FlattenLayerBuilder : ITrainableLayer
     {
         TensorController _controller;
-        LayerDescription _description;
+        LayerConfig _config;
 
         int _input_rows;
         int _input_columns;
@@ -23,10 +23,10 @@ namespace DataLabCore
         Tensor _forward;
         Tensor _backward;
 
-        public FlattenLayerTrainer(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize, LayerDescription layerDescription)
+        public FlattenLayerBuilder(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize, LayerConfig layerConfig)
         {
             _controller = tc;
-            _description = layerDescription;
+            _config = layerConfig;
 
             _input_rows = inputHeight;
             _input_columns = inputWidth;
@@ -53,9 +53,9 @@ namespace DataLabCore
             return _backward;
         }
 
-        public LayerDescription ExportLayerDescription()
+        public LayerConfig ExportLayer()
         {
-            return _description;
+            return _config;
         }
     }
 }
