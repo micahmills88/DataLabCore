@@ -21,6 +21,7 @@ namespace DataLabCore
         public int SampleDepth { get => _depth; }
         public int SampleSize { get => _sample_size; }
         public int SampleCount { get => _samplecount; }
+        public int Classes { get => _classes; }
 
         string samplePath = @"F:\Machine_Learning\Datasets\MNIST\train-images.idx3-ubyte";
         string labelPath = @"F:\Machine_Learning\Datasets\MNIST\train-labels.idx1-ubyte";

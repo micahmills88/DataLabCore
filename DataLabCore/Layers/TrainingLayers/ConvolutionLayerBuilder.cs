@@ -45,7 +45,7 @@ namespace DataLabCore
         Tensor _padded_errors;
         Tensor _inverted_filters;
 
-        public ConvolutionLayerBuilder(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize, LayerConfig layerConfig)
+        public ConvolutionLayerBuilder(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize, LayerConfig layerConfig, bool genWeights)
         {
             _controller = tc;
             _config = layerConfig;
@@ -91,14 +91,20 @@ namespace DataLabCore
             float weight_range = (float)Math.Sqrt(2.0d / (float)(_filter_height * _filter_width * _filter_depth));
 
             int filterSize = _filter_height * _filter_width * _filter_depth * _filter_count;
-            _config.Weights = RandomGenerator.GetFloatNormalDistribution(filterSize, 0f, weight_range);
+            if(genWeights || _config.Weights == null)
+            {
+                _config.Weights = RandomGenerator.GetFloatNormalDistribution(filterSize, 0f, weight_range);
+            }
             _filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, _config.Weights);
             _momentum_filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
             _filter_weights_errors = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
             _inverted_filters = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, new float[filterSize]);
 
             int biasSize = _output_height * _output_width * _output_depth;
-            _config.Bias = new float[biasSize];
+            if(genWeights || _config.Bias == null)
+            {
+                _config.Bias = new float[biasSize];
+            }
             _filter_bias = new Tensor(_controller, _output_height, _output_width, _output_depth, _config.Bias);
             _filter_bias_errors = new Tensor(_controller, _output_height, _output_width, _output_depth, new float[biasSize]);
             _momentum_filter_bias = new Tensor(_controller, _output_height, _output_width, _output_depth, new float[biasSize]);

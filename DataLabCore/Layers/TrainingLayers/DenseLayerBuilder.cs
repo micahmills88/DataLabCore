@@ -34,7 +34,7 @@ namespace DataLabCore
         Tensor _input_errors;
         Tensor _output_errors;
 
-        public DenseLayerBuilder(TensorController controller, int inputs, int batchSize, LayerConfig layerConfig)
+        public DenseLayerBuilder(TensorController controller, int inputs, int batchSize, LayerConfig layerConfig, bool genWeights)
         {
             _controller = controller;
             _config = layerConfig;
@@ -45,20 +45,27 @@ namespace DataLabCore
             _activation = layerConfig.activationType;
 
             //default is glorot (sigmoid)
-            bool isRelu = _activation == ActivationType.ReLU;
+            //bool isRelu = _activation == ActivationType.ReLU;
 
             var weight_count = _input_count * _output_count;
-            if(isRelu)
+            //if(isRelu)
+            //{
+            //    float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
+            //    _config.Weights = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
+            //    _config.Bias = new float[_output_count];
+            //}
+            //else
+            //{
+            //    float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
+            //    _config.Weights = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
+            //    _config.Bias = RandomGenerator.GetFloatNormalDistribution(_output_count, 0f, weight_range);
+            //}
+
+            if (genWeights || _config.Weights == null)
             {
                 float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
                 _config.Weights = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
                 _config.Bias = new float[_output_count];
-            }
-            else
-            {
-                float weight_range = (float)Math.Sqrt(2.0d / (float)_input_count);
-                _config.Weights = RandomGenerator.GetFloatNormalDistribution(weight_count, 0f, weight_range);
-                _config.Bias = RandomGenerator.GetFloatNormalDistribution(_output_count, 0f, weight_range);
             }
 
 
