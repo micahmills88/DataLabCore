@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option csharp_namespace = "DataLabServer";
+
+package workerendpoints;
+
+// The greeting service definition.
+service WorkerEndpoints {
+  // Sends a greeting
+  rpc RegisterWorker (WorkerInfo) returns (RegisterReply);
+  rpc RegisterAccelerator (AcceleratorInfo) returns (RegisterReply);
+}
+
+// The request message containing the user's name.
+message WorkerInfo {
+  string name = 1; //probably hostname
+  string id = 2;
+}
+
+// The response message containing the greetings.
+message AcceleratorInfo {
+  string name = 1; //name of the device
+  string id = 2;
+  string workerId = 3; //id of parent
+  string accelerator = 4; //cpu, cuda, opencl
+  int32 memory = 5; //in MB
+}
+
+enum RegisterResult {
+  Registered = 0;
+  Updated = 1;
+  Failed = 2;
+}
+
+message RegisterReply {
+  RegisterResult resultCode = 1;
+  string id = 2; //returns the id of the item
+}
