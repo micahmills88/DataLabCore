@@ -30,7 +30,7 @@ namespace DataLabCore
         public int Classes { get => _classes; }
 
         //string samplePath = @"F:\Machine_Learning\Datasets\shakespear\shakespear_long_cleaned.txt";
-        string samplePath = @"F:\Machine_Learning\Datasets\shakespear\shakespear_short_cleaned.txt";
+        string samplePath = @"M:\Machine_Learning\Datasets\shakespear\shakespear_short_cleaned.txt";
 
         List<string> _keys = new List<string>();
         Dictionary<string, char> data_labels = new Dictionary<string, char>();
@@ -141,11 +141,14 @@ namespace DataLabCore
         {
             float[] result = new float[_unique_chars.Count];
             int index = _unique_chars.IndexOf(c);
-            result[index] = 1f;
+            if(index >= 0)
+            {
+                result[index] = 1f;
+            }
             return result;
         }
 
-        private float[] CharToVect(char[] chars)
+        public float[] CharToVect(char[] chars)
         {
             List<float> batch = new List<float>();
             for (int i = 0; i < chars.Length; i++)
@@ -153,6 +156,39 @@ namespace DataLabCore
                 batch.AddRange(CharToVect(chars[i]));
             }
             return batch.ToArray();
+        }
+
+        public char[] GetSeedData()
+        {
+            Random rnd = new Random();
+            var key = _keys[rnd.Next(0, data_samples.Count)];
+            return data_samples[key];
+        }
+        public char GenerateCharProbability(float[] charinput)
+        {
+            //probability distribution time;
+            Random rnd = new Random();
+            var charRand = rnd.NextDouble();
+            double accumulator = 0f;
+            int charIndex = charinput.Length - 1;
+            for (int i = 0; i < charinput.Length; i++)
+            {
+                accumulator += charinput[i];
+                if (charRand < accumulator)
+                {
+                    charIndex = i;
+                    break;
+                }
+            }
+
+            char c = _unique_chars[charIndex];
+            return c;
+        }
+
+        public char InterpretChar(float[] charinput)
+        {
+            int index = charinput.ToList().IndexOf(charinput.Max());
+            return _unique_chars[index];
         }
     }
 }

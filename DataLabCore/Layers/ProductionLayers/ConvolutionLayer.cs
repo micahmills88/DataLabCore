@@ -31,42 +31,40 @@ namespace DataLabCore
         Tensor _inputs;
         Tensor _outputs;
 
-        public ConvolutionLayer(
-            TensorController controller,
-            float[] weights,
-            float[] bias,
-            int inputHeight, int inputWidth, int inputDepth,
-            int filterHeight, int filterWidth, int filterCount,
-            int batchSize,
-            ActivationType layerActivation,
-            PaddingType paddingType = PaddingType.None
-            )
+        LayerConfig _config;
+
+        public ConvolutionLayer(TensorController tc, int inputHeight, int inputWidth, int inputDepth, int batchSize, LayerConfig layerConfig)
         {
-            _controller = controller;
-            _filter_height = filterHeight;
-            _filter_width = filterWidth;
+            _controller = tc;
+            _config = layerConfig;
+            _filter_height = layerConfig.WeightRows;
+            _filter_width = layerConfig.WeightColumns;
             _filter_depth = inputDepth;
-            _filter_count = filterCount;
-            _activation = layerActivation;
-            _output_depth = filterCount;
+            _filter_count = layerConfig.WeightCubes;
             _batch_size = batchSize;
+            _activation = layerConfig.activationType;
+            _padding = layerConfig.paddingType;
+            _output_depth = _filter_count;
 
-            _activation = layerActivation;
-            _padding = paddingType;
-
-            if(_padding == PaddingType.Same)
+            var xpad = _filter_width - 1;
+            var ypad = _filter_height - 1;
+            if (_padding == PaddingType.Same)
             {
                 _output_height = inputHeight;
                 _output_width = inputWidth;
+                var padInputHeight = inputHeight + ypad;
+                var padInputWidth = inputWidth + xpad;
+                var padInputSize = padInputHeight * padInputWidth * inputDepth * batchSize;
+                _inputs = new Tensor(_controller, padInputHeight, padInputWidth, inputDepth, batchSize, new float[padInputSize]);
             }
-            else
+            else //PaddingType.None
             {
-                _output_height = inputHeight - (filterHeight - 1);
-                _output_width = inputWidth - (filterWidth - 1);
+                _output_height = inputHeight - ypad;
+                _output_width = inputWidth - xpad;
             }
 
-            _filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, weights);
-            _filter_bias = new Tensor(_controller, _output_height, _output_width, _output_depth, bias);
+            _filter_weights = new Tensor(_controller, _filter_height, _filter_width, _filter_depth, _filter_count, _config.Weights);
+            _filter_bias = new Tensor(_controller, _output_height, _output_width, _output_depth, _config.Bias);
 
             var output_size = _output_height * _output_width * _output_depth * batchSize;
             _outputs = new Tensor(_controller, _output_height, _output_width, _output_depth, batchSize, new float[output_size]);
@@ -87,7 +85,5 @@ namespace DataLabCore
             _controller.ConvolutionForward(_outputs, _inputs, _filter_weights, _filter_bias, _activation);
             return _outputs;
         }
-
-
     }
 }

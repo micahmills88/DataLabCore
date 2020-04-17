@@ -182,16 +182,15 @@ namespace DataLabCore
         static void K_Pad(ILGPU.Index index, ArrayView<float> result, ArrayView<float> values, int val_cols, int val_rows, int xpad, int ypad)
         {
             //the number of threads will be total rows (rows * layers * cubes)
-            int destLayer = index / val_rows;
-            int destRow = index % val_cols;
+            int destLayer = index / val_rows; //what layer are we on
+            int destRow = index % val_rows;
 
             int destRowSize = (xpad * 2) + val_cols;
-            int paddingSize = destRowSize * ypad;
-            int layerSize = (destRowSize * val_rows) + (paddingSize * 2);
+            int destLayerPadding = destRowSize * ypad;
+            int destLayerSize = destLayerPadding + (destRowSize * val_rows) + destLayerPadding;
+            int destLayerIndex = (destLayerSize * destLayer) + destLayerPadding;
 
-            int startIndex = paddingSize + (destLayer * layerSize) + ypad;
-
-            int destIdx = startIndex + (destRow * destRowSize);
+            int destIdx = destLayerIndex + (destRow * destRowSize) + xpad;
             int srcIdx = index * val_cols;
             for (int i = 0; i < val_cols; i++)
             {
