@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DataLabCore\DataLabCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="gdal_csharp">
+      <HintPath>P:\maps\GDAL\bin\gdal\csharp\gdal_csharp.dll</HintPath>
+    </Reference>
+    <Reference Include="ogr_csharp">
+      <HintPath>P:\maps\GDAL\bin\gdal\csharp\ogr_csharp.dll</HintPath>
+    </Reference>
+    <Reference Include="osr_csharp">
+      <HintPath>P:\maps\GDAL\bin\gdal\csharp\osr_csharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

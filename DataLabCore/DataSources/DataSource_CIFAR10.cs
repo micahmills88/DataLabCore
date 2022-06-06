@@ -22,14 +22,16 @@ namespace DataLabCore
         public int SampleSize { get => _sample_size; }
         public int SampleCount { get => _samplecount; }
 
+        public int Classes { get => _classes; }
+
         public int TotalBatches { get { return _samplecount / _batchsize; } }
 
         string[] samplePaths = new string[] {
-            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_1.bin",
-            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_2.bin",
-            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_3.bin",
-            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_4.bin",
-            @"F:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_5.bin"
+            @"M:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_1.bin",
+            @"M:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_2.bin",
+            @"M:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_3.bin",
+            @"M:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_4.bin",
+            @"M:\Machine_Learning\Datasets\cifar-10-batches-bin\data_batch_5.bin"
         };
 
         List<string> keys = new List<string>();

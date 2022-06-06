@@ -9,71 +9,71 @@ namespace DataLabCore
 {
     public partial class TensorKernels
     {
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MatrixMultiply;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> AddBias;
-        public Action<ILGPU.Index, ArrayView<float>> ActivateSigmoid;
-        public Action<ILGPU.Index, ArrayView<float>, int> ActivateSoftmax;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> DeriveSigmoid;
-        public Action<ILGPU.Index, ArrayView<float>> DeriveSoftmax;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int> Transpose2D;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> MultiplyErrors;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int> TransposedMatrixMultiply;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int> RowSums;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, float> AdjustMomentum;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, float> ApplyGradient;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> SubtractTransposed;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> SUM;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>> LogisticLoss;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>> MultiClassLoss;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>> MeanSquaredError;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MatrixMultiply;
+        public Action<Index1, ArrayView<float>, ArrayView<float>> AddBias;
+        public Action<Index1, ArrayView<float>> ActivateSigmoid;
+        public Action<Index1, ArrayView<float>, int> ActivateSoftmax;
+        public Action<Index1, ArrayView<float>, ArrayView<float>> DeriveSigmoid;
+        public Action<Index1, ArrayView<float>> DeriveSoftmax;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, int, int> Transpose2D;
+        public Action<Index1, ArrayView<float>, ArrayView<float>> MultiplyErrors;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int> TransposedMatrixMultiply;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, int> RowSums;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, float> AdjustMomentum;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, float> ApplyGradient;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> SubtractTransposed;
+        public Action<Index1, ArrayView<float>, ArrayView<float>> SUM;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>> LogisticLoss;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>> MultiClassLoss;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>> MeanSquaredError;
 
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> ForwardCorrelation;
-        public Action<ILGPU.Index, ArrayView<float>> ActivateReLU;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>> DeriveReLU;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int, int, int> Pad;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int> InvertFilter;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> InputErrorConvolution;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> WeightErrorCorrelation;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int> SumCubes;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> ForwardCorrelation;
+        public Action<Index1, ArrayView<float>> ActivateReLU;
+        public Action<Index1, ArrayView<float>, ArrayView<float>> DeriveReLU;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, int, int, int, int> Pad;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, int> InvertFilter;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> InputErrorConvolution;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int> WeightErrorCorrelation;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, int, int> SumCubes;
 
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MaxPoolForward;
-        public Action<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MaxPoolBackward;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MaxPoolForward;
+        public Action<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int> MaxPoolBackward;
 
         public TensorKernels(Accelerator accelerator)
         {
-            MatrixMultiply = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Matrix_Multiply);
-            AddBias = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Add_Bias);
-            ActivateSigmoid = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Activate_Sigmoid);
-            ActivateSoftmax = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, int>(K_Activate_Softmax);
-            DeriveSigmoid = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Derive_Sigmoid);
-            DeriveSoftmax = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Derive_Softmax);
-            Transpose2D = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int>(K_Transpose_2D);
-            MultiplyErrors = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Multiply_Errors);
-            TransposedMatrixMultiply = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int>(K_Transposed_Matrix_Multiply);
-            RowSums = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int>(K_Row_Sum);
-            AdjustMomentum = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, float>(K_Adjust_Momentum);
-            ApplyGradient = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, float>(K_Apply_Gradient);
-            SubtractTransposed = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Subtract_Transposed);
-            SUM = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Sum);
-            LogisticLoss = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Logistic_Loss);
-            MultiClassLoss = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Multi_Class_Loss);
-            MeanSquaredError = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Mean_Squared_Error);
+            MatrixMultiply = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Matrix_Multiply);
+            AddBias = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>>(K_Add_Bias);
+            ActivateSigmoid = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>>(K_Activate_Sigmoid);
+            ActivateSoftmax = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, int>(K_Activate_Softmax);
+            DeriveSigmoid = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>>(K_Derive_Sigmoid);
+            DeriveSoftmax = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>>(K_Derive_Softmax);
+            Transpose2D = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, int, int>(K_Transpose_2D);
+            MultiplyErrors = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>>(K_Multiply_Errors);
+            TransposedMatrixMultiply = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int>(K_Transposed_Matrix_Multiply);
+            RowSums = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, int>(K_Row_Sum);
+            AdjustMomentum = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, float>(K_Adjust_Momentum);
+            ApplyGradient = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, float>(K_Apply_Gradient);
+            SubtractTransposed = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Subtract_Transposed);
+            SUM = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>>(K_Sum);
+            LogisticLoss = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Logistic_Loss);
+            MultiClassLoss = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Multi_Class_Loss);
+            MeanSquaredError = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>>(K_Mean_Squared_Error);
             
-            ForwardCorrelation = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Forward_Correlation);
-            ActivateReLU = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>>(K_Activate_ReLU);
-            DeriveReLU = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>>(K_Derive_ReLU);
-            Pad = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int, int, int>(K_Pad);
-            InvertFilter = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int>(K_Invert_Filter);
-            InputErrorConvolution = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Input_Error_Convolution);
-            WeightErrorCorrelation = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Weight_Error_Correlation);
-            SumCubes = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, int, int>(K_Sum_Cubes);
+            ForwardCorrelation = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Forward_Correlation);
+            ActivateReLU = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>>(K_Activate_ReLU);
+            DeriveReLU = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>>(K_Derive_ReLU);
+            Pad = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, int, int, int, int>(K_Pad);
+            InvertFilter = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, int>(K_Invert_Filter);
+            InputErrorConvolution = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Input_Error_Convolution);
+            WeightErrorCorrelation = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int, int, int, int, int, int>(K_Weight_Error_Correlation);
+            SumCubes = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, int, int>(K_Sum_Cubes);
 
-            MaxPoolForward = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Max_Pool_Forward);
-            MaxPoolBackward = accelerator.LoadAutoGroupedStreamKernel<ILGPU.Index, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Max_Pool_Backward);
+            MaxPoolForward = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Max_Pool_Forward);
+            MaxPoolBackward = accelerator.LoadAutoGroupedStreamKernel<Index1, ArrayView<float>, ArrayView<float>, ArrayView<float>, int, int>(K_Max_Pool_Backward);
         }
 
         static void K_Matrix_Multiply(
-            ILGPU.Index index,
+            Index1 index,
             ArrayView<float> output,
             ArrayView<float> left_values,
             ArrayView<float> right_values,
@@ -95,29 +95,31 @@ namespace DataLabCore
             output[index] = sum;
         }
 
-        static void K_Add_Bias(ILGPU.Index index, ArrayView<float> values, ArrayView<float> additions)
+        static void K_Add_Bias(Index1 index, ArrayView<float> values, ArrayView<float> additions)
         {
-            int bias_index = index % additions.Length;
-            values[index] = values[index] + additions[bias_index];
+            int bias_index = (int)(index % additions.Length);
+            var val = values[index] + additions[bias_index];
+            values[index] = val;
         }
 
-        static void K_Activate_Sigmoid(ILGPU.Index index, ArrayView<float> values)
+        static void K_Activate_Sigmoid(Index1 index, ArrayView<float> values)
         {
-            values[index] = 1.0f / (1.0f + XMath.Exp(-values[index]));
+            var val = 1.0f / (1.0f + XMath.Exp(-values[index]));
+            values[index] = val;
         }
 
-        static void K_Derive_Sigmoid(ILGPU.Index index, ArrayView<float> outputs, ArrayView<float> inputs)
+        static void K_Derive_Sigmoid(Index1 index, ArrayView<float> outputs, ArrayView<float> inputs)
         {
             float item = inputs[index];
             outputs[index] = item * (1.0f - item);
         }
 
-        static void K_Derive_Softmax(ILGPU.Index index, ArrayView<float> values)
+        static void K_Derive_Softmax(Index1 index, ArrayView<float> values)
         {
             values[index] = 1f;
         }
 
-        static void K_Activate_Softmax(ILGPU.Index index, ArrayView<float> values, int columns)
+        static void K_Activate_Softmax(Index1 index, ArrayView<float> values, int columns)
         {
             int start = index * columns;
             float rowSum = 0f;
@@ -133,7 +135,7 @@ namespace DataLabCore
             }
         }
 
-        static void K_Transpose_2D(ILGPU.Index index, ArrayView<float> result, ArrayView<float> values, int rows, int cols)
+        static void K_Transpose_2D(Index1 index, ArrayView<float> result, ArrayView<float> values, int rows, int cols)
         { //2*10
             int sourceRow = index % rows;
             int sourceCol = index / rows;
@@ -141,13 +143,13 @@ namespace DataLabCore
             result[index] = values[srcIndex];
         }
 
-        static void K_Multiply_Errors(ILGPU.Index index, ArrayView<float> values, ArrayView<float> errors)
+        static void K_Multiply_Errors(Index1 index, ArrayView<float> values, ArrayView<float> errors)
         {
             values[index] = values[index] * errors[index];
         }
 
         static void K_Transposed_Matrix_Multiply(
-            ILGPU.Index index, //30
+            Index1 index, //30
             ArrayView<float> output, //30
             ArrayView<float> input, //1*3
             ArrayView<float> errors, //10*1
@@ -169,7 +171,7 @@ namespace DataLabCore
             output[index] = sum;
         }
 
-        static void K_Row_Sum(ILGPU.Index index, ArrayView<float> sums, ArrayView<float> values, int columns)
+        static void K_Row_Sum(Index1 index, ArrayView<float> sums, ArrayView<float> values, int columns)
         {
             float sum = 0f;
             int startIndex = index * columns;
@@ -180,17 +182,17 @@ namespace DataLabCore
             sums[index] = sum;
         }
 
-        static void K_Adjust_Momentum(ILGPU.Index index, ArrayView<float> momentum, ArrayView<float> errors, float batchMultiple)
+        static void K_Adjust_Momentum(Index1 index, ArrayView<float> momentum, ArrayView<float> errors, float batchMultiple)
         {
             momentum[index] = (momentum[index] * 0.9f) + (0.1f *(errors[index] * batchMultiple));
         }
 
-        static void K_Apply_Gradient(ILGPU.Index index, ArrayView<float> weights, ArrayView<float> gradient, float learning_rate)
+        static void K_Apply_Gradient(Index1 index, ArrayView<float> weights, ArrayView<float> gradient, float learning_rate)
         {
             weights[index] -= (gradient[index] * learning_rate);
         }
 
-        static void K_Subtract_Transposed(ILGPU.Index index, ArrayView<float> outputs, ArrayView<float> data, ArrayView<float> labels, int rows, int cols)
+        static void K_Subtract_Transposed(Index1 index, ArrayView<float> outputs, ArrayView<float> data, ArrayView<float> labels, int rows, int cols)
         {
             int sourceRow = index % rows;
             int sourceCol = index / rows;
@@ -198,12 +200,12 @@ namespace DataLabCore
             outputs[index] = data[srcIndex] - labels[srcIndex];
         }
 
-        static void K_Sum(ILGPU.Index index, ArrayView<float> sums, ArrayView<float> values)
+        static void K_Sum(Index1 index, ArrayView<float> sums, ArrayView<float> values)
         {
             sums[index] = sums[index] + values[index];   
         }
 
-        static void K_Logistic_Loss(ILGPU.Index index, ArrayView<float> results, ArrayView<float> values, ArrayView<float> expecteds)
+        static void K_Logistic_Loss(Index1 index, ArrayView<float> results, ArrayView<float> values, ArrayView<float> expecteds)
         {
             //expected should be either zero or 1
             float expected = expecteds[index];
@@ -212,7 +214,7 @@ namespace DataLabCore
             results[index] += result;
         }
 
-        static void K_Multi_Class_Loss(ILGPU.Index index, ArrayView<float> results, ArrayView<float> values, ArrayView<float> expecteds)
+        static void K_Multi_Class_Loss(Index1 index, ArrayView<float> results, ArrayView<float> values, ArrayView<float> expecteds)
         {
             float expected = expecteds[index];
             float value = values[index];
@@ -220,7 +222,7 @@ namespace DataLabCore
             results[index] += result;
         }
 
-        static void K_Mean_Squared_Error(ILGPU.Index index, ArrayView<float> results, ArrayView<float> values, ArrayView<float> expecteds)
+        static void K_Mean_Squared_Error(Index1 index, ArrayView<float> results, ArrayView<float> values, ArrayView<float> expecteds)
         {
             float expected = expecteds[index];
             float value = values[index];

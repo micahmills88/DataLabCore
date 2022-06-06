@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <ApplicationIcon />
     <StartupObject />
     <Platforms>AnyCPU;x64</Platforms>
@@ -14,12 +14,40 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ILGPU" Version="0.7.1" />
-    <PackageReference Include="ILGPU.Algorithms" Version="0.7.0" />
-    <PackageReference Include="MongoDB.Bson" Version="2.10.2" />
-    <PackageReference Include="MongoDB.Driver" Version="2.10.2" />
-    <PackageReference Include="MongoDB.Driver.Core" Version="2.10.2" />
-    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.10.2" />
+    <PackageReference Include="ILGPU" Version="0.9.2" />
+    <PackageReference Include="ILGPU.Algorithms" Version="0.9.2" />
+    <PackageReference Include="MongoDB.Bson" Version="2.11.4" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.4" />
+    <PackageReference Include="MongoDB.Driver.Core" Version="2.11.4" />
+    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.11.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\mdmil\.nuget\packages\mongodb.driver.core\2.11.4\build\../runtimes/win/native/snappy64.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\mdmil\.nuget\packages\mongodb.driver.core\2.11.4\build\../runtimes/win/native/snappy64.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\mdmil\.nuget\packages\mongodb.driver.core\2.11.4\build\../runtimes/win/native/libzstd.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\mdmil\.nuget\packages\mongodb.driver.core\2.11.4\build\../runtimes/win/native/snappy32.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="gdal_csharp">
+      <HintPath>P:\maps\GDAL\bin\gdal\csharp\gdal_csharp.dll</HintPath>
+    </Reference>
+    <Reference Include="ogr_csharp">
+      <HintPath>P:\maps\GDAL\bin\gdal\csharp\ogr_csharp.dll</HintPath>
+    </Reference>
+    <Reference Include="osr_csharp">
+      <HintPath>P:\maps\GDAL\bin\gdal\csharp\osr_csharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

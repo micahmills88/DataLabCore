@@ -27,7 +27,7 @@ namespace DataLabCore
             context.EnableAlgorithms();
             if(ct == ControllerType.CPU)
             {
-                _accelerator = new CPUAccelerator(context);
+                _accelerator = new CPUAccelerator(context, 16);
             }
             if(ct == ControllerType.CUDA)
             {
