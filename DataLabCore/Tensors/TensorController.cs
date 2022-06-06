@@ -23,15 +23,19 @@ namespace DataLabCore
 
         public TensorController(ControllerType ct)
         {
-            var context = new Context();
-            context.EnableAlgorithms();
             if(ct == ControllerType.CPU)
             {
-                _accelerator = new CPUAccelerator(context, 16);
+                var context = Context.Create(builder => 
+                    builder
+                    .CPU(new CPUDevice(32, 32, 64))
+                    .EnableAlgorithms()
+                );
+                _accelerator = context.CreateCPUAccelerator(0);
             }
             if(ct == ControllerType.CUDA)
             {
-                _accelerator = new CudaAccelerator(context);
+                var context = Context.Create(builder => builder.Cuda().EnableAlgorithms());
+                _accelerator = context.CreateCudaAccelerator(0);
             }
             _kernels = new TensorKernels(_accelerator);
         }
@@ -42,9 +46,9 @@ namespace DataLabCore
             _accelerator.Synchronize();
         }
 
-        public MemoryBuffer<float> AllocateBuffer(int size)
+        public MemoryBuffer1D<float, Stride1D.Dense> AllocateBuffer(int size)
         {
-            return _accelerator.Allocate<float>(size);
+            return _accelerator.Allocate1D<float>((long)size);
         }
 
         public void DenseForward(Tensor result, Tensor inputs, Tensor weights, Tensor bias, ActivationType activationType)

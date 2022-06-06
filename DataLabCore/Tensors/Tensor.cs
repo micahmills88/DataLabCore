@@ -18,7 +18,7 @@ namespace DataLabCore
         public int Size;
 
         public float[] Data;
-        protected MemoryBuffer<float> _buffer;
+        protected MemoryBuffer1D<float, Stride1D.Dense> _buffer;
         public ArrayView<float> DataView;
 
         protected bool remoteSynchronized = false;
@@ -60,7 +60,7 @@ namespace DataLabCore
         public void SynchronizeToRemote()
         {
             //copy local data to device
-            _buffer.CopyFrom(Data, 0, 0, _buffer.Extent);
+            _buffer.CopyFromCPU(Data);
             remoteSynchronized = true;
             DataView = _buffer.View;
         }
@@ -68,7 +68,7 @@ namespace DataLabCore
         public void SynchronizeToLocal()
         {
             //copy device data locally
-            _buffer.CopyTo(Data, 0, 0, _buffer.Extent);
+            _buffer.CopyToCPU(Data);
             localSynchronized = true;
         }
 
@@ -99,7 +99,7 @@ namespace DataLabCore
 
         public void CopyDataFrom(Tensor other)
         {
-            _buffer.CopyFrom(other._buffer, 0);
+            _buffer.CopyFrom(other._buffer);
         }
     }
 }

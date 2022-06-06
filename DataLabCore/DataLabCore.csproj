@@ -14,12 +14,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ILGPU" Version="0.9.2" />
-    <PackageReference Include="ILGPU.Algorithms" Version="0.9.2" />
-    <PackageReference Include="MongoDB.Bson" Version="2.11.4" />
-    <PackageReference Include="MongoDB.Driver" Version="2.11.4" />
-    <PackageReference Include="MongoDB.Driver.Core" Version="2.11.4" />
-    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.11.4" />
+    <PackageReference Include="ILGPU" Version="1.2.0" />
+    <PackageReference Include="ILGPU.Algorithms" Version="1.2.0" />
+    <PackageReference Include="MongoDB.Bson" Version="2.15.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.15.1" />
+    <PackageReference Include="MongoDB.Driver.Core" Version="2.15.1" />
+    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.15.1" />
   </ItemGroup>
 
   <ItemGroup>

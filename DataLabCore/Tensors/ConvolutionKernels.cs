@@ -8,7 +8,7 @@ namespace DataLabCore
     public partial class TensorKernels
     {
         static void K_Forward_Correlation(
-            Index1 index,
+            Index1D index,
             ArrayView<float> output,
             ArrayView<float> left_values,
             ArrayView<float> right_values,
@@ -64,7 +64,7 @@ namespace DataLabCore
         }
 
         static void K_Input_Error_Convolution(
-            Index1 index,
+            Index1D index,
             ArrayView<float> output,
             ArrayView<float> left_values,
             ArrayView<float> right_values,
@@ -113,7 +113,7 @@ namespace DataLabCore
         }
 
         static void K_Weight_Error_Correlation(
-            Index1 index,
+            Index1D index,
             ArrayView<float> output,
             ArrayView<float> left_values, //left is layer inputs
             ArrayView<float> right_values, //right is output_errors
@@ -163,13 +163,13 @@ namespace DataLabCore
             output[index] = sum;
         }
 
-        static void K_Activate_ReLU(Index1 index, ArrayView<float> values)
+        static void K_Activate_ReLU(Index1D index, ArrayView<float> values)
         {
             float value = values[index];
             values[index] = ILGPU.Algorithms.XMath.Max(value, 0f);
         }
 
-        static void K_Derive_ReLU(Index1 index, ArrayView<float> results, ArrayView<float> values)
+        static void K_Derive_ReLU(Index1D index, ArrayView<float> results, ArrayView<float> values)
         {
             float result = 1.0f;
             if (values[index] <= 0f)
@@ -179,7 +179,7 @@ namespace DataLabCore
             results[index] = result;
         }
 
-        static void K_Pad(Index1 index, ArrayView<float> result, ArrayView<float> values, int val_cols, int val_rows, int xpad, int ypad)
+        static void K_Pad(Index1D index, ArrayView<float> result, ArrayView<float> values, int val_cols, int val_rows, int xpad, int ypad)
         {
             //the number of threads will be total rows (rows * layers * cubes)
             int destLayer = index / val_rows; //what layer are we on
@@ -198,7 +198,7 @@ namespace DataLabCore
             }
         }
 
-        static void K_Invert_Filter(Index1 index, ArrayView<float> inverted, ArrayView<float> normal, int filterLayerSize)
+        static void K_Invert_Filter(Index1D index, ArrayView<float> inverted, ArrayView<float> normal, int filterLayerSize)
         {
             //index is number of filter layers
             int idx = index * filterLayerSize;
@@ -211,7 +211,7 @@ namespace DataLabCore
         }
 
         static void K_Max_Pool_Forward(
-            Index1 index,          //total number of outputs
+            Index1D index,          //total number of outputs
             ArrayView<float> mask,      //same size as inputs
             ArrayView<float> outputs,   //1/4th the size of inputs
             ArrayView<float> inputs,    //same size as mask
@@ -253,7 +253,7 @@ namespace DataLabCore
         }
 
         static void K_Max_Pool_Backward(
-            Index1 index,          //same as error size
+            Index1D index,          //same as error size
             ArrayView<float> mask,      //same size as values
             ArrayView<float> values,    //values to be returned
             ArrayView<float> errors,
@@ -273,7 +273,7 @@ namespace DataLabCore
             values[valueOffset + val_cols + 1]  = errors[index] * mask[valueOffset + val_cols + 1];
         }
 
-        static void K_Sum_Cubes(Index1 index, ArrayView<float> sums, ArrayView<float> values, int cubeCount, int cubeSize)
+        static void K_Sum_Cubes(Index1D index, ArrayView<float> sums, ArrayView<float> values, int cubeCount, int cubeSize)
         {
             //index is same as cubesize
             float sum = 0f;
