@@ -34,7 +34,11 @@ namespace DataLabCore
             }
             if(ct == ControllerType.CUDA)
             {
-                var context = Context.Create(builder => builder.Cuda().EnableAlgorithms());
+                var context = Context.Create(builder => 
+                    builder
+                    .Cuda()
+                    .EnableAlgorithms()
+                );
                 _accelerator = context.CreateCudaAccelerator(0);
             }
             _kernels = new TensorKernels(_accelerator);

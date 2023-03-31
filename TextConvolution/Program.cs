@@ -10,7 +10,7 @@ namespace TextConvolution
             {
 
                 int batchSize = 50;
-                string uri = @"mongodb://10.0.0.21:27017";
+                string uri = @"mongodb://10.0.0.20:27017";
                 string modelName = "MNIST_EXAMPLE";
                 //var datasource = new DataSource_TEXT(10, 5000);
                 //var datasource = new DataSource_MNIST();

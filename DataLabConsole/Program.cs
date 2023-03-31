@@ -9,7 +9,7 @@ namespace DataLabConsole
     {
         static void Main(string[] args)
         {
-            string uri = @"mongodb://10.0.0.21:27017";
+            string uri = @"mongodb://10.0.0.20:27017";
             string modelName = "TCN_RUN_" + Guid.NewGuid().ToString("N");
             var datasource = new DataSource_TEXT(64, 50000);
 
